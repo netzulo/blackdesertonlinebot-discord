@@ -13,9 +13,14 @@ coverage/
 *.test.ts
 *.spec.ts
 
-# Environment
+# Environment variables
+# Exclude all .env files except the example
 .env
-.env.*
+.env.local
+.env.development
+.env.production
+.env.test
+.env.staging
 !.env.example
 
 # Git

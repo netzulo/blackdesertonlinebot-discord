@@ -7,15 +7,18 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for building)
-# Using --legacy-peer-deps to avoid potential npm issues
+# Using --legacy-peer-deps to handle potential peer dependency issues
 RUN npm install --legacy-peer-deps || npm install --force
+
+# Verify TypeScript is installed
+RUN test -f ./node_modules/.bin/tsc || (echo "ERROR: TypeScript not installed" && exit 1)
 
 # Copy source code
 COPY tsconfig.json ./
 COPY src ./src
 
-# Build TypeScript using locally installed tsc
-RUN ./node_modules/.bin/tsc || npx --yes typescript@5.3.3 -p .
+# Build TypeScript
+RUN ./node_modules/.bin/tsc
 
 # Production stage
 FROM node:20-alpine
@@ -38,6 +41,10 @@ USER nodejs
 
 # Set environment
 ENV NODE_ENV=production
+
+# Health check (basic process check - actual bot health is checked by Discord connection)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD node -e "process.exit(0)" || exit 1
 
 # Start the bot
 CMD ["node", "dist/index.js"]

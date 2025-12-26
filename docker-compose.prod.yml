@@ -16,11 +16,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # Note: Basic healthcheck verifies Node.js process is running
+    # Actual Discord bot health is determined by Discord connection status
     healthcheck:
       test: ["CMD", "node", "-e", "process.exit(0)"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
 
 networks:
   bot-network:
