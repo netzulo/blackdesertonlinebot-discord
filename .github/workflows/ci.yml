@@ -121,6 +121,8 @@ jobs:
       run: npm run build
     
     - name: Publish to NPM
+      # Note: This will fail if package version hasn't been updated in package.json
+      # Consider using semantic-release or only publishing on tagged releases for production
       run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
