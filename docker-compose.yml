@@ -1,0 +1,21 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bdo-discord-bot-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env
+    volumes:
+      # Mount source code for development hot-reload (optional)
+      - ./src:/app/src:ro
+    networks:
+      - bot-network
+    command: node dist/index.js
+
+networks:
+  bot-network:
+    driver: bridge

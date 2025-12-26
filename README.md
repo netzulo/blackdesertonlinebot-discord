@@ -65,15 +65,63 @@ npm install
 
 ## 🏃 Running the Bot
 
-### Development Mode
+### Local Development (without Docker)
+
+Development mode with hot reload:
 ```bash
 npm run dev
 ```
 
-### Production Mode
+Production mode:
 ```bash
 npm run build
 npm start
+```
+
+### 🐳 Docker Deployment
+
+#### Development with Docker
+
+The development setup automatically copies `.env.example` to `.env` if it doesn't exist:
+
+```bash
+# Using helper script (recommended)
+./scripts/docker-dev.sh
+
+# Or manually
+docker compose up --build
+```
+
+#### Production with Docker
+
+**Important**: Production requires an existing `.env` file with real credentials. The build will fail if `.env` doesn't exist.
+
+```bash
+# Create .env from example and edit with real values
+cp .env.example .env
+# Edit .env with your actual Discord bot token
+
+# Using helper script (recommended)
+./scripts/docker-prod.sh
+
+# Or manually
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+#### Docker Commands
+
+```bash
+# Build Docker image manually
+docker build -t bdo-discord-bot .
+
+# Stop containers
+docker compose down
+
+# View logs
+docker compose logs -f
+
+# Restart containers
+docker compose restart
 ```
 
 ## 🧪 Testing
@@ -120,10 +168,13 @@ blackdesertonlinebot-discord/
 │   ├── copilot/
 │   │   └── instructions.md    # Copilot prompts for VS Code
 │   └── workflows/
-│       └── ci.yml              # CI/CD workflow
-├── __tests__/                  # Test files
+│       └── ci.yml              # CI/CD workflow with Docker tests
+├── __tests__/                  # Test files (root directory)
 │   ├── commands.test.ts
 │   └── helpers.test.ts
+├── scripts/                    # Helper scripts
+│   ├── docker-dev.sh           # Dev Docker setup
+│   └── docker-prod.sh          # Prod Docker setup
 ├── src/
 │   ├── commands/               # Bot commands
 │   │   ├── ping.ts
@@ -132,9 +183,13 @@ blackdesertonlinebot-discord/
 │   │   └── helpers.ts
 │   ├── types.ts                # TypeScript types
 │   └── index.ts                # Main bot file
+├── .dockerignore               # Docker ignore rules
 ├── .env.example                # Environment variables template
 ├── .eslintrc.js                # ESLint configuration
 ├── .gitignore                  # Git ignore rules
+├── docker-compose.yml          # Docker dev configuration
+├── docker-compose.prod.yml     # Docker prod configuration
+├── Dockerfile                  # Multi-stage Docker build
 ├── jest.config.js              # Jest configuration
 ├── package.json                # Project dependencies
 ├── tsconfig.json               # TypeScript configuration
@@ -208,13 +263,23 @@ VS Code will automatically use these instructions to provide better code suggest
 
 ## 📦 CI/CD
 
-The project includes a GitHub Actions workflow that:
+The project includes a GitHub Actions workflow with two jobs:
+
+**Test Job:**
 - Runs on Node.js 18.x and 20.x
 - Executes linting
 - Builds the project
 - Runs all tests
 - Generates coverage reports
 - Uploads to Codecov (optional)
+
+**Docker Job:**
+- Runs after tests pass
+- Validates `docker-compose.yml` syntax
+- Validates `docker-compose.prod.yml` syntax
+- Tests Docker image build
+- Tests dev docker-compose build
+- Tests production docker-compose build
 
 ## ⚠️ Important Notes
 
