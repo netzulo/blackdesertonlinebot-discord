@@ -100,10 +100,10 @@ blackdesertonlinebot-discord/
 │   │   └── instructions.md    # Copilot prompts for VS Code
 │   └── workflows/
 │       └── ci.yml              # CI/CD workflow
+├── __tests__/                  # Test files
+│   ├── commands.test.ts
+│   └── helpers.test.ts
 ├── src/
-│   ├── __tests__/              # Test files
-│   │   ├── commands.test.ts
-│   │   └── helpers.test.ts
 │   ├── commands/               # Bot commands
 │   │   ├── ping.ts
 │   │   └── bdobase.ts
@@ -151,13 +151,13 @@ const commandList: Command[] = [
 ];
 ```
 
-3. Write tests in `src/__tests__/commands.test.ts`
+3. Write tests in `__tests__/commands.test.ts`
 
 ### Adding Utility Functions
 
 1. Create or update a file in `src/utils/`
 2. Export your function with proper TypeScript types
-3. Write tests in `src/__tests__/`
+3. Write tests in `__tests__/`
 
 ## 🤖 GitHub Copilot
 

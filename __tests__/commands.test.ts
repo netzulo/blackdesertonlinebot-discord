@@ -1,5 +1,5 @@
-import { pingCommand } from '../commands/ping';
-import { bdobaseCommand } from '../commands/bdobase';
+import { pingCommand } from '../src/commands/ping';
+import { bdobaseCommand } from '../src/commands/bdobase';
 
 describe('Commands', () => {
   describe('pingCommand', () => {

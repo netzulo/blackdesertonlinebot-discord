@@ -36,7 +36,7 @@ This is a Discord bot project for Black Desert Online, written in TypeScript usi
 ### File Organization
 - Keep commands in `src/commands/`
 - Keep utilities in `src/utils/`
-- Keep tests in `src/__tests__/`
+- Keep tests in `__tests__/` (root directory)
 - Keep types in `src/types.ts`
 - Main bot logic in `src/index.ts`
 
@@ -80,7 +80,7 @@ export const myCommand: Command = {
 
 ### Writing Tests
 ```typescript
-import { myFunction } from '../utils/myUtil';
+import { myFunction } from '../src/utils/myUtil';
 
 describe('MyUtil', () => {
   describe('myFunction', () => {
@@ -108,7 +108,7 @@ describe('MyUtil', () => {
 1. Create or update file in `src/utils/`
 2. Export the function with proper typing
 3. Add JSDoc documentation
-4. Write tests in `src/__tests__/`
+4. Write tests in `__tests__/`
 5. Ensure >80% coverage
 
 ## Important Notes

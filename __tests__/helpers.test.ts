@@ -1,4 +1,4 @@
-import { formatTimestamp, isValidDiscordToken, formatUptime } from '../utils/helpers';
+import { formatTimestamp, isValidDiscordToken, formatUptime } from '../src/utils/helpers';
 
 describe('Helper Functions', () => {
   describe('formatTimestamp', () => {
