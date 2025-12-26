@@ -4,14 +4,14 @@
   "description": "Black Desert Online Bot for Discord",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "eslint src/**/*.ts __tests__/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts __tests__/**/*.ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\""
   },

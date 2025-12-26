@@ -80,12 +80,27 @@ npm start
 
 ### 🐳 Docker Deployment
 
+#### Unified Docker Script
+
+The project includes a consolidated script that handles both development and production environments using the `ENV_NAME` environment variable:
+
+```bash
+# Development mode (default - copies .env.example to .env if needed)
+ENV_NAME=env ./scripts/docker-run.sh
+
+# Production mode (requires existing .env file)
+ENV_NAME=prod ./scripts/docker-run.sh
+```
+
 #### Development with Docker
 
 The development setup automatically copies `.env.example` to `.env` if it doesn't exist:
 
 ```bash
-# Using helper script (recommended)
+# Using unified script
+ENV_NAME=env ./scripts/docker-run.sh
+
+# Or using legacy script
 ./scripts/docker-dev.sh
 
 # Or manually
@@ -101,7 +116,10 @@ docker compose up --build
 cp .env.example .env
 # Edit .env with your actual Discord bot token
 
-# Using helper script (recommended)
+# Using unified script
+ENV_NAME=prod ./scripts/docker-run.sh
+
+# Or using legacy script
 ./scripts/docker-prod.sh
 
 # Or manually
@@ -141,7 +159,7 @@ Generate coverage report:
 npm run test:coverage
 ```
 
-## 🔍 Linting
+## 🔍 Linting & Formatting
 
 Run linter:
 ```bash
@@ -152,6 +170,18 @@ Fix linting issues:
 ```bash
 npm run lint:fix
 ```
+
+Check code formatting:
+```bash
+npm run format:check
+```
+
+Format code:
+```bash
+npm run format
+```
+
+**Note**: The CI pipeline runs linting first, then formatting checks to ensure code quality.
 
 ## 📝 Available Commands
 

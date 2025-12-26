@@ -13,12 +13,12 @@ RUN npm install --legacy-peer-deps || npm install --force
 # Verify TypeScript is installed
 RUN test -f ./node_modules/.bin/tsc || (echo "ERROR: TypeScript not installed" && exit 1)
 
-# Copy source code
-COPY tsconfig.json ./
+# Copy source code and TypeScript configs
+COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 
-# Build TypeScript
-RUN ./node_modules/.bin/tsc
+# Build TypeScript using tsconfig.build.json
+RUN ./node_modules/.bin/tsc -p tsconfig.build.json
 
 # Production stage
 FROM node:20-alpine

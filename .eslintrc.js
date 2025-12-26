@@ -4,24 +4,37 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
     project: './tsconfig.json',
-    tsconfigRootDir: __dirname
+    tsconfigRootDir: __dirname,
   },
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended'
+    'plugin:@typescript-eslint/recommended',
   ],
   plugins: ['@typescript-eslint'],
   env: {
     node: true,
     es2022: true,
-    jest: true
+    jest: true,
   },
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    'no-console': 'off'
+    'no-console': 'off',
   },
-  ignorePatterns: ['dist/', 'node_modules/', '*.js']
+  ignorePatterns: ['dist/', 'node_modules/', '*.js'],
+  overrides: [
+    {
+      // Less strict rules for test files
+      files: ['__tests__/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        ],
+      },
+    },
+  ],
 };
