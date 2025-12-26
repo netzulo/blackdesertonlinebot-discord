@@ -57,7 +57,11 @@ export class DiscordBot {
         await command.execute(message, args);
       } catch (error) {
         console.error(`Error executing command ${commandName}:`, error);
-        await message.reply('There was an error executing that command!');
+        const errorType = error instanceof Error ? error.name : 'Unknown';
+        await message.reply(
+          `There was an error executing that command. (Error: ${errorType}). ` +
+            'If this keeps happening, please check my permissions.'
+        );
       }
     });
 

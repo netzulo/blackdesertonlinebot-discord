@@ -12,7 +12,7 @@ export const bdobaseCommand: Command = {
   name: 'bdobase',
   description: 'Get basic information about Black Desert Online',
   usage: '!bdobase',
-  execute: async (message: Message): Promise<void> => {
+  execute: async (message: Message, _args: string[]): Promise<void> => {
     const info = `
 **🎮 Black Desert Online - Basic Information**
 
