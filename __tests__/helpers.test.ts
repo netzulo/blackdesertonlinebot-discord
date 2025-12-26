@@ -25,6 +25,27 @@ describe('Helper Functions', () => {
       expect(isValidDiscordToken('...')).toBe(false);
       expect(isValidDiscordToken('valid.')).toBe(false);
     });
+
+    it('should validate token part length boundaries', () => {
+      // Test minimum length boundaries (6-64, 6-64, 20-128)
+      // Valid tokens at minimum boundaries
+      expect(isValidDiscordToken('AAAAAA.BBBBBB.CCCCCCCCCCCCCCCCCCCC')).toBe(true); // 6, 6, 20
+
+      // Invalid tokens below minimum boundaries
+      expect(isValidDiscordToken('AAAAA.BBBBBB.CCCCCCCCCCCCCCCCCCCC')).toBe(false); // part1: 5 chars
+      expect(isValidDiscordToken('AAAAAA.BBBBB.CCCCCCCCCCCCCCCCCCCC')).toBe(false); // part2: 5 chars
+      expect(isValidDiscordToken('AAAAAA.BBBBBB.CCCCCCCCCCCCCCCCC')).toBe(false); // part3: 19 chars
+
+      // Invalid tokens with non-base64url characters
+      expect(isValidDiscordToken('AAAAAA.BBBBBB.CCCCCCCCCCCCCCCCCCCC@')).toBe(false);
+      expect(isValidDiscordToken('AAAAAA.BBBB$B.CCCCCCCCCCCCCCCCCCCC')).toBe(false);
+    });
+
+    it('should accept valid base64url characters', () => {
+      // Test with various valid base64url characters (A-Z, a-z, 0-9, -, _)
+      const validToken = 'ABC123-_De.fgH456-_Ij.kLM789-_NoPqRsTuVwXyZ';
+      expect(isValidDiscordToken(validToken)).toBe(true);
+    });
   });
 
   describe('formatUptime', () => {
