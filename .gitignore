@@ -1,6 +1,9 @@
 # Node modules
 node_modules/
 
+# Environment variables (contains sensitive data)
+.env
+
 # Build output
 dist/
 build/
@@ -156,7 +159,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .envrc
 .venv
 env/

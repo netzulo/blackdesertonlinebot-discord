@@ -30,16 +30,37 @@ cd blackdesertonlinebot-discord
 npm install
 ```
 
-3. Configure environment variables:
-```bash
-cp .env.example .env
-```
+3. **Configure environment variables** (IMPORTANT):
+   
+   a. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   b. Get your Discord Bot Token:
+      - Go to [Discord Developer Portal](https://discord.com/developers/applications)
+      - Click "New Application" and give it a name
+      - Go to the "Bot" section in the left sidebar
+      - Click "Add Bot"
+      - Under "Token", click "Reset Token" and copy it
+      - **Keep this token secret!**
+   
+   c. Edit `.env` file and replace the values:
+   ```env
+   DISCORD_TOKEN=paste_your_actual_token_here
+   DISCORD_CLIENT_ID=your_application_client_id
+   BOT_PREFIX=!
+   ```
+   
+   ⚠️ **NEVER commit your `.env` file to Git!** It contains sensitive credentials.
+   The `.env` file is already included in `.gitignore` to prevent accidental commits.
 
-4. Edit `.env` and add your Discord bot token:
-```
-DISCORD_TOKEN=your_discord_bot_token_here
-DISCORD_CLIENT_ID=your_client_id_here
-BOT_PREFIX=!
+4. Invite your bot to your Discord server:
+   - In Discord Developer Portal, go to "OAuth2" → "URL Generator"
+   - Select scopes: `bot`
+   - Select bot permissions: `Send Messages`, `Read Messages/View Channels`
+   - Copy the generated URL and open it in your browser
+   - Select your server and authorize the bot
 ```
 
 ## 🏃 Running the Bot
@@ -173,10 +194,17 @@ VS Code will automatically use these instructions to provide better code suggest
 
 ## 🔒 Security
 
-- Never commit your `.env` file
-- Keep your Discord bot token secret
-- Regularly update dependencies
-- Review security advisories
+**Environment Variables:**
+- ✅ `.env.example` is committed to show the required variables
+- ❌ `.env` is in `.gitignore` and should **NEVER** be committed
+- 🔐 Your `.env` file contains sensitive credentials (Discord bot token)
+
+**Best Practices:**
+- Never share your Discord bot token with anyone
+- If you accidentally expose your token, regenerate it immediately in the Discord Developer Portal
+- Keep your dependencies up to date: `npm audit` and `npm update`
+- Review security advisories regularly
+- Use environment-specific `.env` files for different deployments (development, staging, production)
 
 ## 📦 CI/CD
 
