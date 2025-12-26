@@ -136,7 +136,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-      if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
     
     - name: Extract metadata for Docker
       id: meta
@@ -149,7 +149,7 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=sha
           type=raw,value=latest
-      if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
     
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -160,5 +160,5 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-      if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
 
