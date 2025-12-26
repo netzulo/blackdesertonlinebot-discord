@@ -61,7 +61,6 @@ npm install
    - Select bot permissions: `Send Messages`, `Read Messages/View Channels`
    - Copy the generated URL and open it in your browser
    - Select your server and authorize the bot
-```
 
 ## 🏃 Running the Bot
 

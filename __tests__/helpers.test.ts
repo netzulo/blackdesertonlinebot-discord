@@ -21,7 +21,7 @@ describe('Helper Functions', () => {
       expect(isValidDiscordToken('')).toBe(false);
     });
 
-    it('should return false for token with empty parts', () => {
+    it('should return false for tokens with empty or insufficient parts', () => {
       expect(isValidDiscordToken('...')).toBe(false);
       expect(isValidDiscordToken('valid.')).toBe(false);
     });

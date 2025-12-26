@@ -23,7 +23,7 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'warn',
     'no-console': 'off',
   },
-  ignorePatterns: ['dist/', 'node_modules/', '*.js'],
+  ignorePatterns: ['dist/', 'node_modules/', '*.js', '!.eslintrc.js', '!jest.config.js'],
   overrides: [
     {
       // Less strict rules for test files

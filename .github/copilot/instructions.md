@@ -101,7 +101,7 @@ describe('MyUtil', () => {
 1. Create file in `src/commands/[commandname].ts`
 2. Implement the Command interface
 3. Import and add to commands list in `src/index.ts`
-4. Add tests in `src/__tests__/commands.test.ts`
+4. Add tests in `__tests__/commands.test.ts`
 5. Update documentation
 
 ### Adding a Utility Function
