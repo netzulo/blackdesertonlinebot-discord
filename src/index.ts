@@ -25,10 +25,7 @@ export class DiscordBot {
   }
 
   private setupCommands(): void {
-    const commandList: Command[] = [
-      pingCommand,
-      bdobaseCommand,
-    ];
+    const commandList: Command[] = [pingCommand, bdobaseCommand];
 
     for (const command of commandList) {
       this.commands.set(command.name, command);
@@ -37,7 +34,9 @@ export class DiscordBot {
 
   private setupEventHandlers(): void {
     this.client.once(Events.ClientReady, (readyClient) => {
+      const envName = process.env.ENV_NAME || 'env';
       console.log(`✅ Bot is ready! Logged in as ${readyClient.user.tag}`);
+      console.log(`🌍 Environment: ${envName}`);
     });
 
     this.client.on(Events.MessageCreate, async (message) => {
@@ -69,7 +68,7 @@ export class DiscordBot {
 
   public async start(): Promise<void> {
     const token = process.env.DISCORD_TOKEN;
-    
+
     if (!token) {
       throw new Error('DISCORD_TOKEN is not defined in environment variables');
     }
@@ -89,7 +88,7 @@ export class DiscordBot {
 // Start the bot if this file is run directly
 if (require.main === module) {
   const bot = new DiscordBot();
-  
+
   bot.start().catch((error) => {
     console.error('Failed to start bot:', error);
     process.exit(1);

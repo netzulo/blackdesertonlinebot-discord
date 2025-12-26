@@ -4,7 +4,7 @@ import { Command } from '../types';
 /**
  * Black Desert Online base information command
  * This command provides basic information about Black Desert Online
- * 
+ *
  * Note: Black Desert Online does not have an official public API.
  * This is a placeholder for game-related information commands.
  */

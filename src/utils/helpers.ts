@@ -19,7 +19,7 @@ export function isValidDiscordToken(token: string): boolean {
   // Discord tokens are typically in the format: MTk4NjIyNDgzNDcxOTI1MjQ4.Cl2FMQ.ZnCjm1XVW7vRze4b7Cq4se7lk
   // They contain three parts separated by dots
   const parts = token.split('.');
-  return parts.length === 3 && parts.every(part => part.length > 0);
+  return parts.length === 3 && parts.every((part) => part.length > 0);
 }
 
 /**

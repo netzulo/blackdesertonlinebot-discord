@@ -7,6 +7,7 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+      - ENV_NAME=prod
     env_file:
       - .env
     networks:

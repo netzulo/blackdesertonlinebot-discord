@@ -7,6 +7,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=development
+      - ENV_NAME=env
     env_file:
       - .env
     volumes:
