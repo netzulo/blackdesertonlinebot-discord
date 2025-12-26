@@ -1,6 +1,6 @@
 {
   "name": "blackdesertonlinebot-discord",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Black Desert Online Bot for Discord",
   "main": "dist/index.js",
   "scripts": {
