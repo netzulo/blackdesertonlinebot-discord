@@ -32,8 +32,14 @@ export async function scrapeBossTimer(): Promise<BossTimerData> {
   try {
     await browser.url('https://garmoth.com/boss-timer');
 
-    // Wait for the page to load
-    await browser.pause(2000);
+    // Wait for the page to load dynamic content
+    await browser.waitUntil(
+      async () => {
+        const headings = await browser.$$("//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'boss')]");
+        return headings.length > 0;
+      },
+      { timeout: 15000, timeoutMsg: 'Boss timer headings not found' }
+    );
 
     // Scrape central section for current boss info
     let previousBoss: BossInfo | null = null;
@@ -42,11 +48,22 @@ export async function scrapeBossTimer(): Promise<BossTimerData> {
 
     // Try to get previous boss
     try {
-      const prevElement = await browser.$('[class*="previous"], [class*="prev"]');
-      if (prevElement) {
-        const text = await prevElement.getText();
-        if (text) {
-          previousBoss = parseBossInfo(text);
+      const prevTextEl = await browser.$(
+        "//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'previous boss')]/following::*[self::div or self::p or self::span][contains(.,':')][1]"
+      );
+      if (await prevTextEl.isExisting()) {
+        const text = await prevTextEl.getText();
+        const info = parseBossInfo(text);
+        if (info) previousBoss = info;
+      } else {
+        // Fallback: look for any element containing a time near the heading
+        const prevFallback = await browser.$(
+          "//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'previous boss')]/following::*[contains(.,':')][1]"
+        );
+        if (await prevFallback.isExisting()) {
+          const text = await prevFallback.getText();
+          const info = parseBossInfo(text);
+          if (info) previousBoss = info;
         }
       }
     } catch (err) {
@@ -55,11 +72,21 @@ export async function scrapeBossTimer(): Promise<BossTimerData> {
 
     // Try to get next boss
     try {
-      const nextElement = await browser.$('[class*="next"], [class*="upcoming"]');
-      if (nextElement) {
-        const text = await nextElement.getText();
-        if (text) {
-          nextBoss = parseBossInfo(text);
+      const nextTextEl = await browser.$(
+        "//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'next boss')]/following::*[self::div or self::p or self::span][contains(.,':')][1]"
+      );
+      if (await nextTextEl.isExisting()) {
+        const text = await nextTextEl.getText();
+        const info = parseBossInfo(text);
+        if (info) nextBoss = info;
+      } else {
+        const nextFallback = await browser.$(
+          "//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'next boss')]/following::*[contains(.,':')][1]"
+        );
+        if (await nextFallback.isExisting()) {
+          const text = await nextFallback.getText();
+          const info = parseBossInfo(text);
+          if (info) nextBoss = info;
         }
       }
     } catch (err) {
@@ -68,13 +95,18 @@ export async function scrapeBossTimer(): Promise<BossTimerData> {
 
     // Try to get followed by bosses
     try {
-      const followedElements = await browser.$$('[class*="followed"], [class*="upcoming-list"] li');
-      for (const element of followedElements) {
-        const text = await element.getText();
-        if (text) {
-          const bossInfo = parseBossInfo(text);
-          if (bossInfo) {
-            followedBy.push(bossInfo);
+      const container = await browser.$(
+        "//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'followed by')]/following::*[self::div or self::ul or self::p][1]"
+      );
+      if (await container.isExisting()) {
+        const items = await container.$$('*');
+        for (const el of items) {
+          const text = await el.getText();
+          if (text) {
+            const info = parseBossInfo(text);
+            if (info && (info.name || info.time)) {
+              followedBy.push(info);
+            }
           }
         }
       }
@@ -145,20 +177,46 @@ function parseBossInfo(text: string): BossInfo | null {
     return null;
   }
 
-  // Try to extract boss name and time
-  // Format might be like "Kzarka - 12:00" or "Kzarka 12:00" etc.
-  const parts = text.split(/[-–:|]/);
+  const cleaned = text.replace(/\s+/g, ' ').trim();
 
-  if (parts.length >= 2) {
+  // Pattern 1: Time first, then one or more boss names separated by |
+  // Example: "02:21:54 Uturi|Offin" or "07:38:05 Golden Pig King|Nouver"
+  const timeFirstMatch = cleaned.match(/^(\d{2}:\d{2}(?::\d{2})?)\s*([A-Za-z ]+(?:\|[A-Za-z ]+)*)$/);
+  if (timeFirstMatch) {
+    const time = timeFirstMatch[1];
+    const names = timeFirstMatch[2].split('|').map((n) => n.trim()).filter(Boolean);
     return {
-      name: parts[0].trim(),
-      time: parts.slice(1).join(':').trim(),
+      name: names.join(' & '),
+      time,
     };
   }
 
-  // If no clear separator, just return the text as name
+  // Pattern 2: Name(s) first, then time (with optional separators like -, :, |)
+  // Examples: "Kzarka - 12:00", "Garmoth 14:00", "Kzarka|Nouver 19:00"
+  const nameFirstMatch = cleaned.match(/^([A-Za-z ]+(?:\|[A-Za-z ]+)*)\s*(?:[-–:|])?\s*(\d{2}:\d{2}(?::\d{2})?)$/);
+  if (nameFirstMatch) {
+    const names = nameFirstMatch[1].split('|').map((n) => n.trim()).filter(Boolean);
+    const time = nameFirstMatch[2];
+    return {
+      name: names.join(' & '),
+      time,
+    };
+  }
+
+  // Fallback: if contains a time anywhere, extract the first HH:MM(:SS)? and use remaining as name
+  const timeAnyMatch = cleaned.match(/(\d{2}:\d{2}(?::\d{2})?)/);
+  if (timeAnyMatch) {
+    const time = timeAnyMatch[1];
+    const name = cleaned.replace(time, '').replace(/[-–|]/g, ' ').trim();
+    return {
+      name: name || cleaned,
+      time,
+    };
+  }
+
+  // If no clear pattern, just return the text as name
   return {
-    name: text.trim(),
+    name: cleaned,
     time: '',
   };
 }
