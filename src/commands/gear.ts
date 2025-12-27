@@ -12,6 +12,10 @@ function getDbService(): DatabaseService {
   return dbService;
 }
 
+function isValidGarmothUrl(url: string): boolean {
+  return /^https?:\/\/(www\.)?garmoth\.com\/character\//.test(url);
+}
+
 export const gearCommand: Command = {
   name: 'gear',
   description: 'Manage and display user gear from Garmoth profiles',
@@ -51,12 +55,12 @@ async function handleGearShow(message: Message): Promise<void> {
 
   const user = getDbService().getUserByDiscordId(mentionedUser.id);
 
-  if (!user) {
+  if (!user || !user.id) {
     await message.reply(`No gear data found for ${mentionedUser.username}.`);
     return;
   }
 
-  const gearList = getDbService().getUserGearByUserId(user.id || 0);
+  const gearList = getDbService().getUserGearByUserId(user.id);
 
   if (gearList.length === 0) {
     await message.reply(`${mentionedUser.username} has no gear data stored.`);
@@ -97,7 +101,7 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
     return;
   }
 
-  if (!url.match(/^https?:\/\/(www\.)?garmoth\.com\/character\//)) {
+  if (!isValidGarmothUrl(url)) {
     await message.reply('Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)');
     return;
   }
@@ -118,6 +122,11 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
     // Create user
     const user = getDbService().createUser(message.author.id, message.author.username, url);
 
+    if (!user.id) {
+      await statusMsg.edit('❌ Failed to create user profile.');
+      return;
+    }
+
     // Save gear data
     const gearData = profile.gear.map((item) => ({
       gear_type: item.gear_type,
@@ -126,7 +135,7 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
       stats: item.stats ? JSON.stringify(item.stats) : undefined,
     }));
 
-    getDbService().replaceUserGear(user.id || 0, gearData);
+    getDbService().replaceUserGear(user.id, gearData);
 
     await statusMsg.edit(
       `✅ Successfully added your gear profile!\n` +
@@ -150,14 +159,14 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
     return;
   }
 
-  if (!url.match(/^https?:\/\/(www\.)?garmoth\.com\/character\//)) {
+  if (!isValidGarmothUrl(url)) {
     await message.reply('Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)');
     return;
   }
 
   const user = getDbService().getUserByDiscordId(message.author.id);
 
-  if (!user) {
+  if (!user || !user.id) {
     await message.reply('You do not have a gear profile yet. Use `!gear add [url]` to create one.');
     return;
   }
@@ -179,7 +188,7 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
       stats: item.stats ? JSON.stringify(item.stats) : undefined,
     }));
 
-    getDbService().replaceUserGear(user.id || 0, gearData);
+    getDbService().replaceUserGear(user.id, gearData);
 
     await statusMsg.edit(
       `✅ Successfully updated your gear profile!\n` +
