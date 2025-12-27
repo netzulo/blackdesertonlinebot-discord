@@ -3,7 +3,14 @@ import { Command } from '../types';
 import { DatabaseService } from '../database/service';
 import { scrapeGarmothProfile } from '../scrapers/garmoth';
 
-const dbService = new DatabaseService();
+let dbService: DatabaseService | null = null;
+
+function getDbService(): DatabaseService {
+  if (!dbService) {
+    dbService = new DatabaseService();
+  }
+  return dbService;
+}
 
 export const gearCommand: Command = {
   name: 'gear',
@@ -42,14 +49,14 @@ async function handleGearShow(message: Message): Promise<void> {
     return;
   }
 
-  const user = dbService.getUserByDiscordId(mentionedUser.id);
+  const user = getDbService().getUserByDiscordId(mentionedUser.id);
 
   if (!user) {
     await message.reply(`No gear data found for ${mentionedUser.username}.`);
     return;
   }
 
-  const gearList = dbService.getUserGearByUserId(user.id || 0);
+  const gearList = getDbService().getUserGearByUserId(user.id || 0);
 
   if (gearList.length === 0) {
     await message.reply(`${mentionedUser.username} has no gear data stored.`);
@@ -90,13 +97,13 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
     return;
   }
 
-  if (!url.includes('garmoth.com/character/')) {
+  if (!url.match(/^https?:\/\/(www\.)?garmoth\.com\/character\//)) {
     await message.reply('Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)');
     return;
   }
 
   // Check if user already exists
-  const existingUser = dbService.getUserByDiscordId(message.author.id);
+  const existingUser = getDbService().getUserByDiscordId(message.author.id);
   if (existingUser) {
     await message.reply('You already have a gear profile. Use `!gear update [url]` to update it.');
     return;
@@ -109,7 +116,7 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
     const profile = await scrapeGarmothProfile(url);
 
     // Create user
-    const user = dbService.createUser(message.author.id, message.author.username, url);
+    const user = getDbService().createUser(message.author.id, message.author.username, url);
 
     // Save gear data
     const gearData = profile.gear.map((item) => ({
@@ -119,7 +126,7 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
       stats: item.stats ? JSON.stringify(item.stats) : undefined,
     }));
 
-    dbService.replaceUserGear(user.id || 0, gearData);
+    getDbService().replaceUserGear(user.id || 0, gearData);
 
     await statusMsg.edit(
       `✅ Successfully added your gear profile!\n` +
@@ -143,12 +150,12 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
     return;
   }
 
-  if (!url.includes('garmoth.com/character/')) {
+  if (!url.match(/^https?:\/\/(www\.)?garmoth\.com\/character\//)) {
     await message.reply('Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)');
     return;
   }
 
-  const user = dbService.getUserByDiscordId(message.author.id);
+  const user = getDbService().getUserByDiscordId(message.author.id);
 
   if (!user) {
     await message.reply('You do not have a gear profile yet. Use `!gear add [url]` to create one.');
@@ -159,7 +166,7 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
 
   try {
     // Update URL if it changed
-    dbService.updateUserUrl(message.author.id, url);
+    getDbService().updateUserUrl(message.author.id, url);
 
     // Scrape the profile
     const profile = await scrapeGarmothProfile(url);
@@ -172,7 +179,7 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
       stats: item.stats ? JSON.stringify(item.stats) : undefined,
     }));
 
-    dbService.replaceUserGear(user.id || 0, gearData);
+    getDbService().replaceUserGear(user.id || 0, gearData);
 
     await statusMsg.edit(
       `✅ Successfully updated your gear profile!\n` +
@@ -189,7 +196,7 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
 }
 
 async function handleGearDelete(message: Message, _args: string[]): Promise<void> {
-  const user = dbService.getUserByDiscordId(message.author.id);
+  const user = getDbService().getUserByDiscordId(message.author.id);
 
   if (!user) {
     await message.reply('You do not have a gear profile to delete.');
@@ -197,7 +204,7 @@ async function handleGearDelete(message: Message, _args: string[]): Promise<void
   }
 
   // Delete user (cascade will delete gear)
-  dbService.deleteUser(message.author.id);
+  getDbService().deleteUser(message.author.id);
 
   await message.reply('✅ Your gear profile has been deleted.');
 }

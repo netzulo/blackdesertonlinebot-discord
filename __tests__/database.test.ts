@@ -23,6 +23,31 @@ describe('Database Service', () => {
     }
   });
 
+  describe('Initialization', () => {
+    it('should create database with custom path', () => {
+      const customPath = path.join(__dirname, 'custom-test.db');
+      const customDb = new DatabaseService(customPath);
+      expect(fs.existsSync(customPath)).toBe(true);
+      customDb.close();
+      fs.unlinkSync(customPath);
+    });
+
+    it('should create database with default path when no path provided', () => {
+      const defaultDb = new DatabaseService();
+      expect(defaultDb).toBeDefined();
+      defaultDb.close();
+      // Clean up default db
+      const defaultPath = path.join(process.cwd(), 'data', 'bot.db');
+      if (fs.existsSync(defaultPath)) {
+        fs.unlinkSync(defaultPath);
+      }
+      const dataDir = path.join(process.cwd(), 'data');
+      if (fs.existsSync(dataDir)) {
+        fs.rmdirSync(dataDir);
+      }
+    });
+  });
+
   describe('User Operations', () => {
     it('should create a user', () => {
       const user = dbService.createUser('123456789', 'testuser', 'https://garmoth.com/character/test');
@@ -179,6 +204,20 @@ describe('Database Service', () => {
       });
 
       dbService.deleteUser('123456789');
+
+      const gearList = dbService.getUserGearByUserId(userId);
+      expect(gearList).toHaveLength(0);
+    });
+
+    it('should deleteUserGear directly', () => {
+      dbService.createUserGear({
+        user_id: userId,
+        gear_type: 'main_weapon',
+        item_name: 'Test Weapon',
+        enhancement_level: 1,
+      });
+
+      dbService.deleteUserGear(userId);
 
       const gearList = dbService.getUserGearByUserId(userId);
       expect(gearList).toHaveLength(0);

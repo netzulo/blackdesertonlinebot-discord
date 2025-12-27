@@ -21,9 +21,36 @@ COPY src ./src
 RUN ./node_modules/.bin/tsc -p tsconfig.build.json
 
 # Production stage
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
+
+# Install Chrome and dependencies for WebdriverIO
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    ca-certificates \
+    fonts-liberation \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpango-1.0-0 \
+    libcairo2 \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
@@ -32,9 +59,12 @@ RUN npm install --omit=dev --legacy-peer-deps
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Create data directory for SQLite database
+RUN mkdir -p /app/data
+
 # Create a non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nodejs && \
     chown -R nodejs:nodejs /app
 
 USER nodejs
