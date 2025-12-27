@@ -8,6 +8,13 @@ node_modules/
 dist/
 build/
 
+# Database files
+data/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
 # TypeScript
 *.tsbuildinfo
 

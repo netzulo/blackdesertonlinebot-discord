@@ -3,6 +3,8 @@ import { config } from 'dotenv';
 import { Command } from './types';
 import { pingCommand } from './commands/ping';
 import { bdobaseCommand } from './commands/bdobase';
+import { gearCommand } from './commands/gear';
+import { bossCommand } from './commands/boss';
 
 config();
 
@@ -25,7 +27,7 @@ export class DiscordBot {
   }
 
   private setupCommands(): void {
-    const commandList: Command[] = [pingCommand, bdobaseCommand];
+    const commandList: Command[] = [pingCommand, bdobaseCommand, gearCommand, bossCommand];
 
     for (const command of commandList) {
       this.commands.set(command.name, command);

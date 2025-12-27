@@ -6,6 +6,10 @@ A Discord bot boilerplate for Black Desert Online community, written in TypeScri
 
 - **TypeScript**: Full TypeScript support with strict type checking
 - **Discord.js**: Official Discord library (v14+)
+- **Web Scraping**: WebdriverIO integration for headless scraping of Garmoth.com
+- **Database**: SQLite database with Zod schema validation for persistent data storage
+- **Gear Management**: Track and display user gear from Garmoth profiles
+- **Boss Timer**: Real-time boss schedule information from Garmoth
 - **Testing**: Jest testing framework with coverage reports
 - **CI/CD**: GitHub Actions workflow for automated testing
 - **Linting**: ESLint with TypeScript support
@@ -188,6 +192,24 @@ npm run format
 |---------|-------------|-------|
 | `!ping` | Check bot responsiveness and latency | `!ping` |
 | `!bdobase` | Get basic Black Desert Online information | `!bdobase` |
+| `!gear` | Manage and display user gear from Garmoth profiles | `!gear @user` or `!gear add [url]` |
+| `!boss` | Show Black Desert Online boss timer information | `!boss` or `!boss table` |
+
+### Gear Command Details
+
+The `!gear` command allows you to manage and display user gear profiles scraped from Garmoth:
+
+- **`!gear @username`** - Display the gear for a mentioned Discord user
+- **`!gear add [garmoth_url]`** - Add your gear profile by providing a Garmoth character URL (e.g., https://garmoth.com/character/YourCharID)
+- **`!gear update [garmoth_url]`** - Update your gear profile with a new URL or refresh data
+- **`!gear delete`** - Remove your gear profile from the database
+
+### Boss Command Details
+
+The `!boss` command provides Black Desert Online boss timer information from Garmoth:
+
+- **`!boss`** - Show current boss status (previous, next, and upcoming bosses)
+- **`!boss table`** - Display the full weekly boss schedule table
 
 ## 🏗️ Project Structure
 
@@ -200,18 +222,30 @@ blackdesertonlinebot-discord/
 │       └── ci.yml              # CI/CD workflow with Docker tests
 ├── __tests__/                  # Test files (root directory)
 │   ├── commands.test.ts
-│   └── helpers.test.ts
+│   ├── database.test.ts
+│   ├── helpers.test.ts
+│   └── new-commands.test.ts
 ├── scripts/                    # Helper scripts
 │   ├── docker-dev.sh           # Dev Docker setup
 │   └── docker-prod.sh          # Prod Docker setup
 ├── src/
 │   ├── commands/               # Bot commands
 │   │   ├── ping.ts
-│   │   └── bdobase.ts
+│   │   ├── bdobase.ts
+│   │   ├── gear.ts
+│   │   └── boss.ts
+│   ├── database/               # Database layer
+│   │   ├── schema.ts           # Zod schemas and types
+│   │   └── service.ts          # Database operations
+│   ├── scrapers/               # Web scraping modules
+│   │   ├── garmoth.ts          # Garmoth profile scraper
+│   │   └── boss-timer.ts       # Boss timer scraper
 │   ├── utils/                  # Utility functions
 │   │   └── helpers.ts
 │   ├── types.ts                # TypeScript types
 │   └── index.ts                # Main bot file
+├── data/                       # SQLite database (gitignored)
+│   └── bot.db
 ├── .dockerignore               # Docker ignore rules
 ├── .env.example                # Environment variables template
 ├── .eslintrc.js                # ESLint configuration
@@ -313,10 +347,14 @@ The project includes a GitHub Actions workflow with two jobs:
 ## ⚠️ Important Notes
 
 ### Black Desert Online API
-Black Desert Online does not provide an official public API. This bot focuses on:
+Black Desert Online does not provide an official public API. This bot respects the game's Terms of Service and uses:
+- **Web scraping** with headless browser from Garmoth.com (a community resource) for:
+  - Public character profiles and gear information
+  - Boss timer schedules
 - Community features
 - Information sharing
 - Linking to official resources
+- **No unauthorized access** to game servers or private data
 - **No unofficial or third-party game APIs**
 
 ### Official Resources Only
