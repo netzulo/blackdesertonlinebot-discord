@@ -68,6 +68,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Create .env for Docker validation
+      run: cp .env.example .env
+    
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     
@@ -80,9 +83,6 @@ jobs:
       run: |
         docker compose -f docker-compose.prod.yml config > /dev/null
         echo "✅ docker-compose.prod.yml syntax is valid"
-    
-    - name: Create .env for dev build test
-      run: cp .env.example .env
     
     - name: Build Docker image
       run: docker build --build-arg ENV_NAME=prod -t bdo-discord-bot:test .
