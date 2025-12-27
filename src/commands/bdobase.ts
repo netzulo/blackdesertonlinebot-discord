@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { Command } from '../types';
+import { logger } from '../utils/logger';
 
 /**
  * Black Desert Online base information command
@@ -13,6 +14,10 @@ export const bdobaseCommand: Command = {
   description: 'Get basic information about Black Desert Online',
   usage: '!bdobase',
   execute: async (message: Message, _args: string[]): Promise<void> => {
+    logger.info('BDO base command invoked', {
+      channel: message.channelId,
+      user: message.author.id,
+    });
     const info = `
 **🎮 Black Desert Online - Basic Information**
 
@@ -34,5 +39,6 @@ _Note: For real-time game data, please check official Black Desert Online source
     `.trim();
 
     await message.reply(info);
+    logger.info('BDO base command replied');
   },
 };
