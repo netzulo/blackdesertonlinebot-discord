@@ -58,10 +58,17 @@ export class DiscordBot {
       } catch (error) {
         console.error(`Error executing command ${commandName}:`, error);
         const errorType = error instanceof Error ? error.name : 'Unknown';
-        await message.reply(
-          `There was an error executing that command. (Error: ${errorType}). ` +
-            'If this keeps happening, please check my permissions.'
-        );
+        try {
+          await message.reply(
+            `There was an error executing that command. (Error: ${errorType}). ` +
+              'If this keeps happening, please check my permissions.'
+          );
+        } catch (replyError) {
+          console.error(
+            `Failed to send error reply for command ${commandName}:`,
+            replyError
+          );
+        }
       }
     });
 
