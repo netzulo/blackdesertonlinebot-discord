@@ -1,0 +1,33 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - ENV_NAME=prod
+    container_name: bdo-discord-bot-prod
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - ENV_NAME=prod
+    env_file:
+      - .env
+    networks:
+      - bot-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Healthcheck verifies the Node.js bot process is running
+    # Actual Discord bot health is determined by Discord connection status
+    healthcheck:
+      test: ["CMD-SHELL", "ps | grep 'node dist/index.js' | grep -q -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  bot-network:
+    driver: bridge
