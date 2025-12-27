@@ -45,8 +45,9 @@ ARG ENV_NAME=dev
 ENV ENV_NAME=${ENV_NAME}
 
 # Health check: verify the bot process is running
+# Using Alpine-compatible ps command (BusyBox ps)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD ps aux | grep "node dist/index.js" | grep -q -v grep || exit 1
+  CMD ps | grep "node dist/index.js" | grep -q -v grep || exit 1
 
 # Start the bot
 CMD ["node", "dist/index.js"]
