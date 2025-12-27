@@ -73,7 +73,9 @@ export class DatabaseService {
   // User gear operations
   createUserGear(gear: Omit<UserGear, 'id' | 'created_at' | 'updated_at'>): UserGear {
     // Validate input with Zod
-    const gearData = UserGearSchema.omit({ id: true, created_at: true, updated_at: true }).parse(gear);
+    const gearData = UserGearSchema.omit({ id: true, created_at: true, updated_at: true }).parse(
+      gear
+    );
 
     const stmt = this.db.prepare(`
       INSERT INTO users_gear (user_id, gear_type, item_name, enhancement_level, stats)
@@ -110,10 +112,15 @@ export class DatabaseService {
   }
 
   // Bulk operations for updating gear
-  replaceUserGear(user_id: number, gearList: Omit<UserGear, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]): void {
+  replaceUserGear(
+    user_id: number,
+    gearList: Omit<UserGear, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]
+  ): void {
     // Validate each gear item with Zod
     const validatedGearList = gearList.map((gear) =>
-      UserGearSchema.omit({ id: true, user_id: true, created_at: true, updated_at: true }).parse(gear)
+      UserGearSchema.omit({ id: true, user_id: true, created_at: true, updated_at: true }).parse(
+        gear
+      )
     );
 
     // Use transaction for atomic operation

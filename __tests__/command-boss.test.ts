@@ -80,9 +80,7 @@ describe('Boss Command', () => {
       await bossCommand.execute(mockMessage, ['table']);
 
       expect(mockScrapeBossTimer).toHaveBeenCalled();
-      expect(mockReply.edit).toHaveBeenCalledWith(
-        expect.stringContaining('Weekly Boss Schedule')
-      );
+      expect(mockReply.edit).toHaveBeenCalledWith(expect.stringContaining('Weekly Boss Schedule'));
     });
 
     it('should handle empty schedule', async () => {

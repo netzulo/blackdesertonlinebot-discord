@@ -84,7 +84,15 @@ export async function scrapeBossTimer(): Promise<BossTimerData> {
 
     // Scrape weekly schedule table
     const weeklySchedule: Record<string, BossInfo[]> = {};
-    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const daysOfWeek = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
 
     try {
       // Try to find the schedule table
@@ -94,7 +102,7 @@ export async function scrapeBossTimer(): Promise<BossTimerData> {
         try {
           const cells = await row.$$('td');
           const cellCount = await Promise.resolve(cells.length);
-          
+
           if (cellCount > 0) {
             const dayText = await cells[0].getText();
             const day = daysOfWeek.find((d) => dayText.toLowerCase().includes(d.toLowerCase()));

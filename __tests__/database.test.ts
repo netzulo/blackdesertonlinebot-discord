@@ -50,7 +50,11 @@ describe('Database Service', () => {
 
   describe('User Operations', () => {
     it('should create a user', () => {
-      const user = dbService.createUser('123456789', 'testuser', 'https://garmoth.com/character/test');
+      const user = dbService.createUser(
+        '123456789',
+        'testuser',
+        'https://garmoth.com/character/test'
+      );
 
       expect(user).toBeDefined();
       expect(user.discord_id).toBe('123456789');
@@ -101,7 +105,11 @@ describe('Database Service', () => {
     let userId: number;
 
     beforeEach(() => {
-      const user = dbService.createUser('123456789', 'testuser', 'https://garmoth.com/character/test');
+      const user = dbService.createUser(
+        '123456789',
+        'testuser',
+        'https://garmoth.com/character/test'
+      );
       userId = user.id || 0;
     });
 

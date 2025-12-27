@@ -74,10 +74,19 @@ async function handleBossTable(message: Message): Promise<void> {
 
     let display = '**📅 Weekly Boss Schedule**\n\n';
 
-    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const daysOrder = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
 
     if (Object.keys(bossData.weeklySchedule).length === 0) {
-      display += 'No schedule data available. Please check https://garmoth.com/boss-timer for the latest information.';
+      display +=
+        'No schedule data available. Please check https://garmoth.com/boss-timer for the latest information.';
     } else {
       for (const day of daysOrder) {
         if (bossData.weeklySchedule[day] && bossData.weeklySchedule[day].length > 0) {

@@ -128,31 +128,16 @@ export const commandArgsFixtures = {
       ['add', 'https://garmoth.com/character/test123'],
       ['add', 'https://garmoth.com/character/abc456'],
     ],
-    addInvalid: [
-      ['add'],
-      ['add', 'https://example.com/test'],
-      ['add', 'not-a-url'],
-    ],
+    addInvalid: [['add'], ['add', 'https://example.com/test'], ['add', 'not-a-url']],
     update: [
       ['update', 'https://garmoth.com/character/updated123'],
       ['update', 'https://garmoth.com/character/new456'],
     ],
-    updateInvalid: [
-      ['update'],
-      ['update', 'https://example.com/test'],
-      ['update', 'invalid'],
-    ],
-    delete: [
-      ['delete'],
-    ],
+    updateInvalid: [['update'], ['update', 'https://example.com/test'], ['update', 'invalid']],
+    delete: [['delete']],
   },
   bossCommand: {
-    current: [
-      [],
-      ['current'],
-    ],
-    table: [
-      ['table'],
-    ],
+    current: [[], ['current']],
+    table: [['table']],
   },
 };

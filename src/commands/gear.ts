@@ -102,7 +102,9 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
   }
 
   if (!isValidGarmothUrl(url)) {
-    await message.reply('Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)');
+    await message.reply(
+      'Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)'
+    );
     return;
   }
 
@@ -160,7 +162,9 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
   }
 
   if (!isValidGarmothUrl(url)) {
-    await message.reply('Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)');
+    await message.reply(
+      'Please provide a valid Garmoth profile URL (e.g., https://garmoth.com/character/...)'
+    );
     return;
   }
 

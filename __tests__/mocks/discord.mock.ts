@@ -9,7 +9,7 @@ export function createMockUser(overrides?: Record<string, any>): any {
     tag: 'testuser#0001',
     toString: () => '<@123456789>' as `<@${string}>`,
   };
-  
+
   return {
     ...baseUser,
     ...overrides,

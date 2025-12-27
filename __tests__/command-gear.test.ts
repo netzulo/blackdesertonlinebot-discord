@@ -79,9 +79,7 @@ describe('Gear Command', () => {
 
       await gearCommand.execute(mockMessage, []);
 
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        expect.stringContaining('No gear data found')
-      );
+      expect(mockMessage.reply).toHaveBeenCalledWith(expect.stringContaining('No gear data found'));
     });
 
     it('should show message when user exists but has no gear items', async () => {
@@ -151,9 +149,7 @@ describe('Gear Command', () => {
       expect(mockScrapeGarmoth).toHaveBeenCalledWith('https://garmoth.com/character/test');
       expect(mockDatabaseService.createUser).toHaveBeenCalled();
       expect(mockDatabaseService.replaceUserGear).toHaveBeenCalled();
-      expect(mockReply.edit).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully added')
-      );
+      expect(mockReply.edit).toHaveBeenCalledWith(expect.stringContaining('Successfully added'));
     });
 
     it('should handle scraping errors gracefully', async () => {
@@ -166,9 +162,7 @@ describe('Gear Command', () => {
 
       await gearCommand.execute(mockMessage, ['add', 'https://garmoth.com/character/test']);
 
-      expect(mockReply.edit).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to scrape')
-      );
+      expect(mockReply.edit).toHaveBeenCalledWith(expect.stringContaining('Failed to scrape'));
     });
   });
 
@@ -210,9 +204,7 @@ describe('Gear Command', () => {
       expect(mockDatabaseService.updateUserUrl).toHaveBeenCalled();
       expect(mockScrapeGarmoth).toHaveBeenCalledWith('https://garmoth.com/character/updated');
       expect(mockDatabaseService.replaceUserGear).toHaveBeenCalled();
-      expect(mockReply.edit).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully updated')
-      );
+      expect(mockReply.edit).toHaveBeenCalledWith(expect.stringContaining('Successfully updated'));
     });
 
     it('should handle update scraping errors', async () => {
@@ -225,9 +217,7 @@ describe('Gear Command', () => {
 
       await gearCommand.execute(mockMessage, ['update', 'https://garmoth.com/character/test']);
 
-      expect(mockReply.edit).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to scrape')
-      );
+      expect(mockReply.edit).toHaveBeenCalledWith(expect.stringContaining('Failed to scrape'));
     });
   });
 
