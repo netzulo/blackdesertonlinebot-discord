@@ -13,7 +13,8 @@
     "lint": "eslint src/**/*.ts __tests__/**/*.ts",
     "lint:fix": "eslint src/**/*.ts __tests__/**/*.ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\"",
+    "ci:local": "npm ci && npm run lint && npm run format && npm run build && npm test && npm run test:coverage"
   },
   "keywords": [
     "discord",
