@@ -40,8 +40,8 @@ RUN addgroup -g 1001 -S nodejs && \
 USER nodejs
 
 # Set environment variables
-# ENV_NAME can be 'prod' or 'env' (default to 'prod')
-ARG ENV_NAME=prod
+# ENV_NAME can be 'prod' or 'env' (default to 'env' for development)
+ARG ENV_NAME=env
 ENV ENV_NAME=${ENV_NAME}
 
 # Health check: verify the bot process is running
