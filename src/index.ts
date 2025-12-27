@@ -64,10 +64,7 @@ export class DiscordBot {
               'If this keeps happening, please check my permissions.'
           );
         } catch (replyError) {
-          console.error(
-            `Failed to send error reply for command ${commandName}:`,
-            replyError
-          );
+          console.error(`Failed to send error reply for command ${commandName}:`, replyError);
         }
       }
     });
