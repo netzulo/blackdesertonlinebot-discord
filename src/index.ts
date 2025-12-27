@@ -5,6 +5,7 @@ import { pingCommand } from './commands/ping';
 import { bdobaseCommand } from './commands/bdobase';
 import { gearCommand } from './commands/gear';
 import { bossCommand } from './commands/boss';
+import { logger } from './utils/logger';
 
 config();
 
@@ -37,8 +38,8 @@ export class DiscordBot {
   private setupEventHandlers(): void {
     this.client.once(Events.ClientReady, (readyClient) => {
       const envName = process.env.ENV_NAME || 'env';
-      console.log(`✅ Bot is ready! Logged in as ${readyClient.user.tag}`);
-      console.log(`🌍 Environment: ${envName}`);
+      logger.info(`✅ Bot is ready! Logged in as ${readyClient.user.tag}`);
+      logger.info(`🌍 Environment: ${envName}`);
     });
 
     this.client.on(Events.MessageCreate, async (message) => {
@@ -58,7 +59,7 @@ export class DiscordBot {
       try {
         await command.execute(message, args);
       } catch (error) {
-        console.error(`Error executing command ${commandName}:`, error);
+        logger.error(`Error executing command ${commandName}:`, error as Error);
         const errorType = error instanceof Error ? error.name : 'Unknown';
         try {
           await message.reply(
@@ -66,13 +67,16 @@ export class DiscordBot {
               'If this keeps happening, please check my permissions.'
           );
         } catch (replyError) {
-          console.error(`Failed to send error reply for command ${commandName}:`, replyError);
+          logger.error(
+            `Failed to send error reply for command ${commandName}:`,
+            replyError as Error
+          );
         }
       }
     });
 
     this.client.on(Events.Error, (error) => {
-      console.error('Discord client error:', error);
+      logger.error('Discord client error:', error);
     });
   }
 
@@ -100,19 +104,19 @@ if (require.main === module) {
   const bot = new DiscordBot();
 
   bot.start().catch((error) => {
-    console.error('Failed to start bot:', error);
+    logger.error('Failed to start bot:', error);
     process.exit(1);
   });
 
   // Handle process termination
   process.on('SIGINT', async () => {
-    console.log('Received SIGINT, shutting down gracefully...');
+    logger.info('Received SIGINT, shutting down gracefully...');
     await bot.stop();
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
-    console.log('Received SIGTERM, shutting down gracefully...');
+    logger.info('Received SIGTERM, shutting down gracefully...');
     await bot.stop();
     process.exit(0);
   });

@@ -49,12 +49,23 @@ npm install
       - Under "Token", click "Reset Token" and copy it
       - **Keep this token secret!**
    
-   c. Edit `.env` file and replace the values:
-   ```env
-   DISCORD_TOKEN=paste_your_actual_token_here
-   DISCORD_CLIENT_ID=your_application_client_id
-   BOT_PREFIX=!
-   ```
+  c. Edit `.env` file and replace the values:
+  ```env
+  # Required
+  DISCORD_TOKEN=paste_your_actual_token_here
+  DISCORD_CLIENT_ID=your_application_client_id
+  BOT_PREFIX=!
+
+  # Optional
+  ENV_NAME=env               # env | prod
+  LOG_LEVEL=info             # error | warn | info | verbose | debug | silly
+
+  # Scraper browser config (optional)
+  BROWSER_NAME=chrome        # chrome | chromium | firefox
+  BROWSER_HEADLESS=true      # true | false
+  BROWSER_WIDTH=1920
+  BROWSER_HEIGHT=1080
+  ```
    
    ⚠️ **NEVER commit your `.env` file to Git!** It contains sensitive credentials.
    The `.env` file is already included in `.gitignore` to prevent accidental commits.
@@ -210,6 +221,10 @@ The `!boss` command provides Black Desert Online boss timer information from Gar
 
 - **`!boss`** - Show current boss status (previous, next, and upcoming bosses)
 - **`!boss table`** - Display the full weekly boss schedule table
+
+Tip: For debugging scraping issues, set `BROWSER_HEADLESS=false` and use `BROWSER_WIDTH/BROWSER_HEIGHT` to standardize the viewport (e.g., 1920x1080). You can also adjust `BROWSER_NAME` to `firefox` when needed.
+
+Logging: Control verbosity with `LOG_LEVEL` (default: `info`).
 
 ## 🏗️ Project Structure
 

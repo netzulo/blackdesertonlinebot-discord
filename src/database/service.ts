@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import { User, UserGear, UserSchema, UserGearSchema, initializeDatabase } from './schema';
 import path from 'path';
 import fs from 'fs';
+import { logger } from '../utils/logger';
 
 export class DatabaseService {
   private db: Database.Database;
@@ -19,6 +20,7 @@ export class DatabaseService {
     this.db = new Database(finalPath);
     this.db.pragma('foreign_keys = ON');
     initializeDatabase(this.db);
+    logger.info('Database initialized', { path: finalPath });
   }
 
   // User operations
@@ -40,6 +42,7 @@ export class DatabaseService {
     if (!user) {
       throw new Error('Failed to create user');
     }
+    logger.info('User created', { id: user.id, discord_id: user.discord_id });
     return user;
   }
 
@@ -63,11 +66,13 @@ export class DatabaseService {
       WHERE discord_id = ?
     `);
     stmt.run(garmoth_url, discord_id);
+    logger.info('User URL updated', { discord_id });
   }
 
   deleteUser(discord_id: string): void {
     const stmt = this.db.prepare('DELETE FROM users WHERE discord_id = ?');
     stmt.run(discord_id);
+    logger.info('User deleted', { discord_id });
   }
 
   // User gear operations
@@ -93,6 +98,7 @@ export class DatabaseService {
     if (!userGear) {
       throw new Error('Failed to create user gear');
     }
+    logger.info('User gear created', { id: userGear.id, user_id: userGear.user_id });
     return userGear;
   }
 
@@ -144,9 +150,11 @@ export class DatabaseService {
     });
 
     transaction();
+    logger.info('User gear replaced', { user_id, count: validatedGearList.length });
   }
 
   close(): void {
     this.db.close();
+    logger.info('Database closed');
   }
 }

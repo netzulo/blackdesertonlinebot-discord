@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import { Command } from '../types';
 import { DatabaseService } from '../database/service';
 import { scrapeGarmothProfile } from '../scrapers/garmoth';
+import { logger } from '../utils/logger';
 
 let dbService: DatabaseService | null = null;
 
@@ -120,6 +121,10 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
   try {
     // Scrape the profile
     const profile = await scrapeGarmothProfile(url);
+    logger.info('Gear add: scraped profile', {
+      items: profile.gear.length,
+      user: message.author.id,
+    });
 
     // Create user
     const user = getDbService().createUser(message.author.id, message.author.username, url);
@@ -145,7 +150,7 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
         `Use \`!gear @${message.author.username}\` to view your gear.`
     );
   } catch (error) {
-    console.error('Error scraping gear:', error);
+    logger.error('Error scraping gear:', error as Error);
     await statusMsg.edit(
       '❌ Failed to scrape gear data from the provided URL. ' +
         'Please make sure the profile is public and the URL is correct.'
@@ -183,6 +188,10 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
 
     // Scrape the profile
     const profile = await scrapeGarmothProfile(url);
+    logger.info('Gear update: scraped profile', {
+      items: profile.gear.length,
+      user: message.author.id,
+    });
 
     // Update gear data
     const gearData = profile.gear.map((item) => ({
@@ -200,7 +209,7 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
         `Use \`!gear @${message.author.username}\` to view your gear.`
     );
   } catch (error) {
-    console.error('Error scraping gear:', error);
+    logger.error('Error scraping gear:', error as Error);
     await statusMsg.edit(
       '❌ Failed to scrape gear data from the provided URL. ' +
         'Please make sure the profile is public and the URL is correct.'

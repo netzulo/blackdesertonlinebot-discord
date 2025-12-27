@@ -1,76 +1,127 @@
-import { Message } from 'discord.js';
+import { Message, EmbedBuilder } from 'discord.js';
 import { Command } from '../types';
 import { scrapeBossTimer } from '../scrapers/boss-timer';
+import { logger } from '../utils/logger';
 
 export const bossCommand: Command = {
   name: 'boss',
   description: 'Show Black Desert Online boss timer information',
-  usage: '!boss | !boss table',
+  usage: '!boss [region] | !boss table [region]',
   execute: async (message: Message, args: string[]): Promise<void> => {
-    const subcommand = args[0]?.toLowerCase();
-
-    if (subcommand === 'table') {
-      await handleBossTable(message);
+    const maybeSub = args[0]?.toLowerCase();
+    const isTable = maybeSub === 'table';
+    const region = isTable ? args[1] : args[0];
+    if (isTable) {
+      await handleBossTable(message, region);
     } else {
-      await handleBossCurrent(message);
+      await handleBossCurrent(message, region);
     }
   },
 };
 
-async function handleBossCurrent(message: Message): Promise<void> {
+async function handleBossCurrent(message: Message, region?: string): Promise<void> {
   const statusMsg = await message.reply('⏳ Fetching current boss information...');
 
   try {
-    const bossData = await scrapeBossTimer();
+    logger.debug('Boss current requested', { region: region || 'EU' });
+    const bossData = await scrapeBossTimer(region);
+    logger.info('Boss data fetched', {
+      hasPrev: !!bossData.previousBoss,
+      hasNext: !!bossData.nextBoss,
+      followedCount: bossData.followedBy.length,
+      region: region || 'EU',
+    });
 
+    const embed = new EmbedBuilder()
+      .setTitle('🎯 Black Desert Online Boss Timer')
+      .setDescription('Use `!boss table` to see the full weekly schedule.')
+      .setColor(0x0099ff);
+
+    if (bossData.previousBoss) {
+      embed.addFields({
+        name: 'Previous Boss',
+        value: `${bossData.previousBoss.name}${bossData.previousBoss.time ? ` — ${bossData.previousBoss.time}` : ''}`,
+        inline: false,
+      });
+      if (bossData.previousBoss.imageUrl) {
+        embed.setThumbnail(bossData.previousBoss.imageUrl);
+      }
+    }
+
+    if (bossData.nextBoss) {
+      embed.addFields({
+        name: 'Next Boss',
+        value: `${bossData.nextBoss.name}${bossData.nextBoss.time ? ` — ${bossData.nextBoss.time}` : ''}`,
+        inline: false,
+      });
+      if (!embed.data.thumbnail && bossData.nextBoss.imageUrl) {
+        embed.setThumbnail(bossData.nextBoss.imageUrl);
+      }
+    }
+
+    if (bossData.followedBy.length > 0) {
+      const fb = bossData.followedBy
+        .slice(0, 5)
+        .map((b) => `${b.name}${b.time ? ` — ${b.time}` : ''}`)
+        .join('\n');
+      embed.addFields({ name: 'Followed By', value: fb, inline: false });
+    }
+
+    // Keep a plain-text summary for backward compatibility with tests
     let display = '**🎯 Black Desert Online Boss Timer**\n\n';
-
     if (bossData.previousBoss) {
       display += `**Previous Boss:**\n`;
       display += `• ${bossData.previousBoss.name}`;
       if (bossData.previousBoss.time) {
-        display += ` - ${bossData.previousBoss.time}`;
+        display += ` — ${bossData.previousBoss.time}`;
       }
       display += '\n\n';
     }
-
     if (bossData.nextBoss) {
       display += `**Next Boss:**\n`;
       display += `• ${bossData.nextBoss.name}`;
       if (bossData.nextBoss.time) {
-        display += ` - ${bossData.nextBoss.time}`;
+        display += ` — ${bossData.nextBoss.time}`;
       }
       display += '\n\n';
     }
-
     if (bossData.followedBy.length > 0) {
       display += `**Followed By:**\n`;
       for (const boss of bossData.followedBy.slice(0, 5)) {
         display += `• ${boss.name}`;
         if (boss.time) {
-          display += ` - ${boss.time}`;
+          display += ` — ${boss.time}`;
         }
         display += '\n';
       }
       display += '\n';
     }
-
-    display += '_Use `!boss table` to see the full weekly schedule._';
+    display += 'Use `!boss table` to see the full weekly schedule.';
 
     await statusMsg.edit(display);
+
+    // Send rich embed as a follow-up for improved UX
+    if ('send' in message.channel) {
+      await message.channel.send({ embeds: [embed] });
+    }
   } catch (error) {
-    console.error('Error fetching boss data:', error);
+    logger.error('Error fetching boss data:', error as Error);
     await statusMsg.edit(
       '❌ Failed to fetch boss timer data. Please try again later or check https://garmoth.com/boss-timer directly.'
     );
   }
 }
 
-async function handleBossTable(message: Message): Promise<void> {
+async function handleBossTable(message: Message, region?: string): Promise<void> {
   const statusMsg = await message.reply('⏳ Fetching boss schedule...');
 
   try {
-    const bossData = await scrapeBossTimer();
+    logger.debug('Boss table requested', { region: region || 'EU' });
+    const bossData = await scrapeBossTimer(region);
+    logger.info('Boss schedule fetched', {
+      days: Object.keys(bossData.weeklySchedule).length,
+      region: region || 'EU',
+    });
 
     let display = '**📅 Weekly Boss Schedule**\n\n';
 
@@ -118,7 +169,7 @@ async function handleBossTable(message: Message): Promise<void> {
       await statusMsg.edit(display);
     }
   } catch (error) {
-    console.error('Error fetching boss schedule:', error);
+    logger.error('Error fetching boss schedule:', error as Error);
     await statusMsg.edit(
       '❌ Failed to fetch boss schedule data. Please try again later or check https://garmoth.com/boss-timer directly.'
     );
