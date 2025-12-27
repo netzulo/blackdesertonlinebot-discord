@@ -39,8 +39,10 @@ RUN addgroup -g 1001 -S nodejs && \
 
 USER nodejs
 
-# Set environment
-ENV NODE_ENV=production
+# Set environment variables
+# ENV_NAME can be 'prod' or 'env' (default to 'prod')
+ARG ENV_NAME=prod
+ENV ENV_NAME=${ENV_NAME}
 
 # Health check: verify the bot process is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \

@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - ENV_NAME=env
     container_name: bdo-discord-bot-dev
     restart: unless-stopped
     environment:

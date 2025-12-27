@@ -85,7 +85,7 @@ jobs:
       run: cp .env.example .env
     
     - name: Build Docker image
-      run: docker build -t bdo-discord-bot:test .
+      run: docker build --build-arg ENV_NAME=prod -t bdo-discord-bot:test .
     
     - name: Test docker-compose build (dev)
       run: |
