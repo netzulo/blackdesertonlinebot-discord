@@ -58,6 +58,7 @@ export class MockDatabaseService {
   getUserByDiscordId = jest.fn();
   createUser = jest.fn();
   updateUserUrl = jest.fn();
+  updateUserStats = jest.fn();
   deleteUser = jest.fn();
   getUserGearByUserId = jest.fn();
   replaceUserGear = jest.fn();
@@ -73,6 +74,7 @@ export function resetMockDatabase(): void {
   mockDatabaseService.getUserByDiscordId.mockReset();
   mockDatabaseService.createUser.mockReset();
   mockDatabaseService.updateUserUrl.mockReset();
+  mockDatabaseService.updateUserStats.mockReset();
   mockDatabaseService.deleteUser.mockReset();
   mockDatabaseService.getUserGearByUserId.mockReset();
   mockDatabaseService.replaceUserGear.mockReset();

@@ -127,7 +127,12 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
     });
 
     // Create user
-    const user = getDbService().createUser(message.author.id, message.author.username, url);
+    const user = getDbService().createUser(
+      message.author.id,
+      message.author.username,
+      url,
+      profile.stats ? JSON.stringify(profile.stats) : undefined
+    );
 
     if (!user.id) {
       await statusMsg.edit('❌ Failed to create user profile.');
@@ -192,6 +197,11 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
       items: profile.gear.length,
       user: message.author.id,
     });
+
+    // Update profile stats
+    if (profile.stats) {
+      getDbService().updateUserStats(message.author.id, JSON.stringify(profile.stats));
+    }
 
     // Update gear data
     const gearData = profile.gear.map((item) => ({

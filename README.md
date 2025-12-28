@@ -204,7 +204,17 @@ npm run format
 | `!ping` | Check bot responsiveness and latency | `!ping` |
 | `!bdobase` | Get basic Black Desert Online information | `!bdobase` |
 | `!gear` | Manage and display user gear from Garmoth profiles | `!gear @user` or `!gear add [url]` |
+| `!gearscore` | Display AP/AAP/DP stats from user gear profile | `!gearscore` or `!gearscore @user` |
 | `!boss` | Show Black Desert Online boss timer information | `!boss` or `!boss table` |
+
+### Gearscore Command Details
+
+The `!gearscore` command displays gear score statistics (AP/AAP/DP) for users who have added their Garmoth profile:
+
+- **`!gearscore`** - Display your own gear score stats (AP, AAP, DP)
+- **`!gearscore @username`** - Display gear score stats for a mentioned Discord user
+
+**Note:** You must first add your gear profile using `!gear add [garmoth_url]` before you can use the gearscore command. The stats are automatically extracted from your Garmoth profile when you add or update your gear.
 
 ### Gear Command Details
 

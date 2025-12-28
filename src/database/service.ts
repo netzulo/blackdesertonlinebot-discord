@@ -24,20 +24,31 @@ export class DatabaseService {
   }
 
   // User operations
-  createUser(discord_id: string, discord_username: string, garmoth_url: string): User {
+  createUser(
+    discord_id: string,
+    discord_username: string,
+    garmoth_url: string,
+    profile_stats?: string
+  ): User {
     // Validate input with Zod
     const userData = UserSchema.parse({
       discord_id,
       discord_username,
       garmoth_url,
+      profile_stats,
     });
 
     const stmt = this.db.prepare(`
-      INSERT INTO users (discord_id, discord_username, garmoth_url)
-      VALUES (?, ?, ?)
+      INSERT INTO users (discord_id, discord_username, garmoth_url, profile_stats)
+      VALUES (?, ?, ?, ?)
     `);
 
-    const result = stmt.run(userData.discord_id, userData.discord_username, userData.garmoth_url);
+    const result = stmt.run(
+      userData.discord_id,
+      userData.discord_username,
+      userData.garmoth_url,
+      userData.profile_stats || null
+    );
     const user = this.getUserById(result.lastInsertRowid as number);
     if (!user) {
       throw new Error('Failed to create user');
@@ -67,6 +78,16 @@ export class DatabaseService {
     `);
     stmt.run(garmoth_url, discord_id);
     logger.info('User URL updated', { discord_id });
+  }
+
+  updateUserStats(discord_id: string, profile_stats: string): void {
+    const stmt = this.db.prepare(`
+      UPDATE users 
+      SET profile_stats = ?, updated_at = CURRENT_TIMESTAMP 
+      WHERE discord_id = ?
+    `);
+    stmt.run(profile_stats, discord_id);
+    logger.info('User stats updated', { discord_id });
   }
 
   deleteUser(discord_id: string): void {
