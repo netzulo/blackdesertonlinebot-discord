@@ -206,8 +206,6 @@ npm run format
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| `!ping` | Check bot responsiveness and latency | `!ping` |
-| `!bdobase` | Get basic Black Desert Online information | `!bdobase` |
 | `!gear` | Manage and display user gear from Garmoth profiles | `!gear @user` or `!gear add [url]` |
 | `!boss` | Show Black Desert Online boss timer information | `!boss` or `!boss table` |
 
@@ -252,8 +250,6 @@ blackdesertonlinebot-discord/
 │   └── docker-prod.sh          # Prod Docker setup
 ├── src/
 │   ├── commands/               # Bot commands
-│   │   ├── ping.ts
-│   │   ├── bdobase.ts
 │   │   ├── gear.ts
 │   │   └── boss.ts
 │   ├── database/               # Database layer
@@ -306,8 +302,6 @@ import { myCommand } from './commands/mycommand';
 
 // Add to commandList array
 const commandList: Command[] = [
-  pingCommand,
-  bdobaseCommand,
   myCommand, // Add here
 ];
 ```
