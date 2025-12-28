@@ -11,6 +11,28 @@ function getDbService(): DatabaseService {
   return dbService;
 }
 
+// Stat key variations for extracting BDO stats
+const STAT_KEYS = {
+  ap: ['ap', 'AP', 'attack', 'Attack'],
+  aap: ['aap', 'AAP', 'awakening_ap', 'Awakening AP'],
+  dp: ['dp', 'DP', 'defense', 'Defense'],
+};
+
+/**
+ * Extract a stat value from stats object using multiple possible key names
+ */
+function extractStat(
+  stats: Record<string, string | number>,
+  possibleKeys: string[]
+): string | number {
+  for (const key of possibleKeys) {
+    if (key in stats) {
+      return stats[key];
+    }
+  }
+  return 'N/A';
+}
+
 export const gearscoreCommand: Command = {
   name: 'gearscore',
   description: 'Display AP/AAP/DP stats from user gear profile',
@@ -55,19 +77,19 @@ export const gearscoreCommand: Command = {
     // Format and display the stats
     let response = `**⚔️ Gear Score for ${targetUsername}**\n\n`;
 
-    // Extract common BDO stats
-    const ap = stats.ap || stats.AP || stats.attack || stats.Attack || 'N/A';
-    const aap = stats.aap || stats.AAP || stats.awakening_ap || stats['Awakening AP'] || 'N/A';
-    const dp = stats.dp || stats.DP || stats.defense || stats.Defense || 'N/A';
+    // Extract common BDO stats using the helper function
+    const ap = extractStat(stats, STAT_KEYS.ap);
+    const aap = extractStat(stats, STAT_KEYS.aap);
+    const dp = extractStat(stats, STAT_KEYS.dp);
 
     response += `🗡️ **AP (Attack Power):** ${ap}\n`;
     response += `⚡ **AAP (Awakening AP):** ${aap}\n`;
     response += `🛡️ **DP (Defense Power):** ${dp}\n`;
 
     // Add any other available stats
-    const displayedKeys = ['ap', 'AP', 'attack', 'Attack', 'aap', 'AAP', 'awakening_ap', 'Awakening AP', 'dp', 'DP', 'defense', 'Defense'];
+    const displayedKeys = [...STAT_KEYS.ap, ...STAT_KEYS.aap, ...STAT_KEYS.dp];
     const otherStats = Object.entries(stats).filter(([key]) => !displayedKeys.includes(key));
-    
+
     if (otherStats.length > 0) {
       response += '\n**📊 Other Stats:**\n';
       for (const [key, value] of otherStats) {
