@@ -8,7 +8,8 @@ loadEnv();
  * Defaults to http://localhost:9432/proxy
  */
 export function getProxyUrl(): string {
-  const url = process.env.PROXY_URL || 'http://localhost:9432/proxy';
+  const raw = process.env.PROXY_URL;
+  const url = raw && raw !== 'undefined' && raw.trim() !== '' ? raw : 'http://localhost:9432/proxy';
   // Normalize: strip trailing slash
   return url.replace(/\/$/, '');
 }

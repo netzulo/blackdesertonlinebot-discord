@@ -32,24 +32,34 @@ export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothP
     // Scrape gear section
     const gear: GearItem[] = [];
 
-    // Try to get gear information from the page
-    // Note: This is a simplified implementation - actual selectors need to be adjusted based on Garmoth's HTML structure
-    const gearElements = await browser.$$('.gear-item, [class*="gear"], [class*="equipment"]');
+    // Target gear items inside the equipment section and extract slot, image and enhancement level
+    const gearElements = await browser.$$('.equipment .gear');
 
     for (const element of gearElements) {
       try {
-        const itemName = await element.getText();
-        if (itemName && itemName.trim()) {
-          // Extract enhancement level from item name (e.g., "[V] Blackstar Weapon" -> 5)
-          const enhancementMatch = itemName.match(/\[([IVX]+)\]/);
-          const enhancement = enhancementMatch ? romanToInt(enhancementMatch[1]) : 0;
+        const classAttr = (await element.getAttribute('class')) || '';
+        const gearSlot = parseGearSlot(classAttr);
 
-          gear.push({
-            gear_type: 'equipment',
-            item_name: itemName.replace(/\[([IVX]+)\]\s*/, '').trim(),
-            enhancement_level: enhancement,
-          });
-        }
+        const imgEl = await element.$('img');
+        const imageUrl = imgEl ? await imgEl.getAttribute('src') : undefined;
+        const alt = imgEl ? await imgEl.getAttribute('alt') : undefined;
+
+        const enhanceEl = await element.$('p.enhance-level');
+        const enhanceText = enhanceEl ? (await enhanceEl.getText()).trim() : '';
+        const enhancement = parseEnhancement(enhanceText);
+
+        const rarity = parseRarity(classAttr);
+        const itemName = deriveItemName(gearSlot, alt, imageUrl);
+
+        gear.push({
+          gear_type: gearSlot,
+          item_name: itemName,
+          enhancement_level: enhancement,
+          stats: {
+            image_url: imageUrl || '',
+            rarity,
+          },
+        });
       } catch (err) {
         // Skip elements that can't be processed
         logger.warn('Error processing gear element:', err as Error);
@@ -125,4 +135,49 @@ function toProxiedProfileUrl(url: string): string {
     const path = trimmed.startsWith('/character/') ? trimmed : `/character/${trimmed}`;
     return `${getProxyUrl()}${path}`;
   }
+}
+
+// Extract gear slot from class list (e.g., "gear-main_weapon" -> "main_weapon")
+function parseGearSlot(classAttr: string): string {
+  const classes = classAttr.split(/\s+/);
+  const gearClass = classes.find((c) => c.startsWith('gear-') && c !== 'gear');
+  return gearClass ? gearClass.replace('gear-', '') : 'equipment';
+}
+
+// Parse rarity number from class like "border-rarity-6" -> 6
+function parseRarity(classAttr: string): number {
+  const m = classAttr.match(/border-rarity-(\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+// Convert enhancement label to number (roman numerals like IV/VII/X or "+10")
+function parseEnhancement(text: string): number {
+  if (!text) return 0;
+  const plus = text.match(/^\+(\d{1,2})$/);
+  if (plus) return parseInt(plus[1], 10);
+  const roman = text.replace(/[^IVXLCDM]/gi, '').toUpperCase();
+  return roman ? romanToInt(roman) : 0;
+}
+
+// Derive item name from slot, alt or image src filename
+function deriveItemName(slot: string, alt?: string | null, src?: string | null): string {
+  if (alt && alt.trim()) return alt.trim();
+  if (src) {
+    try {
+      const url = new URL(src);
+      const parts = url.pathname.split('/');
+      const file = parts[parts.length - 1] || '';
+      const base = file.replace(/\.(webp|png|jpg|jpeg)$/i, '');
+      return base.replace(/[_-]+/g, ' ').trim() || slot;
+    } catch {
+      const base = src.split('/').pop() || '';
+      return (
+        base
+          .replace(/\.(webp|png|jpg|jpeg)$/i, '')
+          .replace(/[_-]+/g, ' ')
+          .trim() || slot
+      );
+    }
+  }
+  return slot;
 }

@@ -35,6 +35,12 @@ export async function createBrowser(): Promise<Browser> {
   });
 
   try {
+    // Keep element queries snappy to avoid long hangs
+    try {
+      await browser.setTimeout({ implicit: 500, pageLoad: 10000, script: 5000 });
+    } catch (err) {
+      logger.warn('Failed to set browser timeouts', err as Error);
+    }
     await browser.setWindowSize(width, height);
     if (!headless) {
       await browser.maximizeWindow();

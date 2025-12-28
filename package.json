@@ -4,6 +4,7 @@
   "description": "Black Desert Online Bot for Discord",
   "main": "dist/index.js",
   "scripts": {
+    "clean": "rm -rf coverage dist __tests__/*.db data/*.db package-lock.json yarn.lock node_modules",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
@@ -14,7 +15,7 @@
     "lint:fix": "eslint src/**/*.ts __tests__/**/*.ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\"",
-    "ci:local": "npm ci && npm run lint && npm run format:check && npm run build && npm run test:coverage"
+    "ci:local": "npm run clean && npm i && npm run lint && npm run format:check && npm run build && npm run test:coverage"
   },
   "keywords": [
     "discord",
