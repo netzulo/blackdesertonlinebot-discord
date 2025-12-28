@@ -1,4 +1,8 @@
 import winston from 'winston';
+import { config as loadEnv } from 'dotenv';
+
+// Ensure environment variables from .env are available before reading LOG_LEVEL
+loadEnv();
 
 const level = (process.env.LOG_LEVEL || 'info').toLowerCase();
 
