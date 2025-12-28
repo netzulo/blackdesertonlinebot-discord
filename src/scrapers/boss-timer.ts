@@ -1,6 +1,7 @@
-import { remote } from 'webdriverio';
 import type { Browser } from 'webdriverio';
 import { logger } from '../utils/logger';
+import { createBrowser, tryDismissConsent } from './common';
+import { getProxyUrl } from '../utils/config';
 
 export interface BossInfo {
   name: string;
@@ -16,48 +17,19 @@ export interface BossTimerData {
 }
 
 export async function scrapeBossTimer(region?: string): Promise<BossTimerData> {
-  const name = (process.env.BROWSER_NAME || 'chrome').toLowerCase();
   const headlessEnv = process.env.BROWSER_HEADLESS;
   const headless = headlessEnv ? /^(true|1|yes)$/i.test(headlessEnv) : true;
   const width = parseInt(process.env.BROWSER_WIDTH || '1920', 10);
   const height = parseInt(process.env.BROWSER_HEIGHT || '1080', 10);
 
-  const commonArgs = [
-    '--disable-gpu',
-    '--no-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-setuid-sandbox',
-  ];
-  const chromeArgs = headless
-    ? ['--headless=new', `--window-size=${width},${height}`, ...commonArgs]
-    : [`--window-size=${width},${height}`, ...commonArgs];
-  const firefoxArgs = headless ? ['-headless'] : [];
-
-  const capabilities: Record<string, unknown> = { browserName: name };
-  if (name === 'chrome' || name === 'chromium') {
-    capabilities['goog:chromeOptions'] = { args: chromeArgs };
-  } else if (name === 'firefox') {
-    capabilities['moz:firefoxOptions'] = { args: firefoxArgs };
-  }
-
-  const browser = await remote({
-    logLevel: 'error',
-    capabilities,
-  });
+  const browser = await createBrowser();
 
   try {
-    await browser.url('http://localhost:9432/proxy/boss-timer');
+    await browser.url(`${getProxyUrl()}/boss-timer`);
     logger.debug('Navigated to boss timer page');
 
     // Ensure window has expected resolution and maximize when visible
-    try {
-      await browser.setWindowSize(width, height);
-      if (!headless) {
-        await browser.maximizeWindow();
-      }
-    } catch (err) {
-      logger.warn('Failed to set or maximize browser window', err as Error);
-    }
+    // Window sizing handled in createBrowser; keep values for context
 
     // Attempt to dismiss privacy/cookie consent overlays if present
     await tryDismissConsent(browser);

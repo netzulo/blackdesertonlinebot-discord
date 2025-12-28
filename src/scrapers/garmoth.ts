@@ -1,4 +1,7 @@
-import { remote } from 'webdriverio';
+import type { Browser } from 'webdriverio';
+import { createBrowser, tryDismissConsent } from './common';
+import { getProxyUrl } from '../utils/config';
+import { logger } from '../utils/logger';
 
 export interface GearItem {
   gear_type: string;
@@ -13,24 +16,15 @@ export interface GarmothProfile {
 }
 
 export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothProfile> {
-  const browser = await remote({
-    logLevel: 'error',
-    capabilities: {
-      browserName: 'chrome',
-      'goog:chromeOptions': {
-        args: [
-          '--headless',
-          '--disable-gpu',
-          '--no-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-setuid-sandbox',
-        ],
-      },
-    },
-  });
+  const browser = (await createBrowser()) as Browser;
 
   try {
-    await browser.url(profileUrl);
+    const proxied = toProxiedProfileUrl(profileUrl);
+    await browser.url(proxied);
+    logger.debug('Navigated to garmoth profile via proxy', { proxied });
+
+    // Attempt to dismiss privacy/cookie consent overlays if present
+    await tryDismissConsent(browser);
 
     // Wait for the page to load
     await browser.pause(2000);
@@ -58,7 +52,7 @@ export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothP
         }
       } catch (err) {
         // Skip elements that can't be processed
-        console.error('Error processing gear element:', err);
+        logger.warn('Error processing gear element:', err as Error);
       }
     }
 
@@ -77,7 +71,7 @@ export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothP
         }
       } catch (err) {
         // Skip elements that can't be processed
-        console.error('Error processing stat element:', err);
+        logger.warn('Error processing stat element:', err as Error);
       }
     }
 
@@ -112,4 +106,23 @@ function romanToInt(roman: string): number {
   }
 
   return result;
+}
+
+/**
+ * Map a Garmoth character URL to the proxied endpoint.
+ * Example: https://garmoth.com/character/UoLalCoMhf -> {PROXY_URL}/character/UoLalCoMhf
+ */
+function toProxiedProfileUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    // Expect paths like /character/<id>
+    const match = u.pathname.match(/^\/character\/([^\/?#]+)(?:[\/?#].*)?$/);
+    const path = match ? `/character/${match[1]}` : u.pathname;
+    return `${getProxyUrl()}${path}`;
+  } catch {
+    // Fallback: if not a valid URL, treat as already-path
+    const trimmed = url.trim();
+    const path = trimmed.startsWith('/character/') ? trimmed : `/character/${trimmed}`;
+    return `${getProxyUrl()}${path}`;
+  }
 }
