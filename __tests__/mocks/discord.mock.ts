@@ -57,6 +57,7 @@ export function createMockMessageWithMentions(mentionedUsers: any[]): any {
 export class MockDatabaseService {
   getUserByDiscordId = jest.fn();
   createUser = jest.fn();
+  createStreamer = jest.fn();
   updateUserUrl = jest.fn();
   deleteUser = jest.fn();
   getUserGearByUserId = jest.fn();
@@ -64,6 +65,9 @@ export class MockDatabaseService {
   createUserGear = jest.fn();
   getUserById = jest.fn();
   deleteUserGear = jest.fn();
+  getAllUsers = jest.fn();
+  getAllStreamers = jest.fn();
+  seedStreamers = jest.fn();
   close = jest.fn();
 }
 
@@ -72,6 +76,7 @@ export const mockDatabaseService = new MockDatabaseService();
 export function resetMockDatabase(): void {
   mockDatabaseService.getUserByDiscordId.mockReset();
   mockDatabaseService.createUser.mockReset();
+  mockDatabaseService.createStreamer.mockReset();
   mockDatabaseService.updateUserUrl.mockReset();
   mockDatabaseService.deleteUser.mockReset();
   mockDatabaseService.getUserGearByUserId.mockReset();
@@ -79,5 +84,8 @@ export function resetMockDatabase(): void {
   mockDatabaseService.createUserGear.mockReset();
   mockDatabaseService.getUserById.mockReset();
   mockDatabaseService.deleteUserGear.mockReset();
+  mockDatabaseService.getAllUsers.mockReset();
+  mockDatabaseService.getAllStreamers.mockReset();
+  mockDatabaseService.seedStreamers.mockReset();
   mockDatabaseService.close.mockReset();
 }

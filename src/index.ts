@@ -6,6 +6,8 @@ import { bdobaseCommand } from './commands/bdobase';
 import { gearCommand } from './commands/gear';
 import { bossCommand } from './commands/boss';
 import { logger } from './utils/logger';
+import { DatabaseService } from './database/service';
+import { getStreamersWithGear } from './data/streamers';
 
 config();
 
@@ -40,6 +42,9 @@ export class DiscordBot {
       const envName = process.env.ENV_NAME || 'env';
       logger.info(`✅ Bot is ready! Logged in as ${readyClient.user.tag}`);
       logger.info(`🌍 Environment: ${envName}`);
+      
+      // Seed streamers on startup
+      this.seedStreamersData();
     });
 
     this.client.on(Events.MessageCreate, async (message) => {
@@ -96,6 +101,22 @@ export class DiscordBot {
 
   public getClient(): Client {
     return this.client;
+  }
+
+  private seedStreamersData(): void {
+    try {
+      const streamersWithGear = getStreamersWithGear();
+      if (streamersWithGear.length > 0) {
+        const dbService = new DatabaseService();
+        const seededCount = dbService.seedStreamers(streamersWithGear);
+        dbService.close();
+        logger.info(`💎 Seeded ${seededCount} streamer(s) with gear data`);
+      } else {
+        logger.info('📝 No streamers with gear URLs to seed');
+      }
+    } catch (error) {
+      logger.error('Failed to seed streamers:', error as Error);
+    }
   }
 }
 

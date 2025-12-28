@@ -20,7 +20,7 @@ function isValidGarmothUrl(url: string): boolean {
 export const gearCommand: Command = {
   name: 'gear',
   description: 'Manage and display user gear from Garmoth profiles',
-  usage: '!gear @user | !gear add [url] | !gear update [url] | !gear delete',
+  usage: '!gear @user | !gear add [url] | !gear update [url] | !gear delete | !gear list',
   execute: async (message: Message, args: string[]): Promise<void> => {
     const subcommand = args[0]?.toLowerCase();
 
@@ -31,6 +31,8 @@ export const gearCommand: Command = {
       await handleGearUpdate(message, args);
     } else if (subcommand === 'delete') {
       await handleGearDelete(message, args);
+    } else if (subcommand === 'list') {
+      await handleGearList(message);
     } else if (message.mentions.users.size > 0) {
       // Show gear for mentioned user
       await handleGearShow(message);
@@ -40,7 +42,8 @@ export const gearCommand: Command = {
           '• `!gear @user` - Show gear for a Discord user\n' +
           '• `!gear add [garmoth_url]` - Add your gear profile\n' +
           '• `!gear update [garmoth_url]` - Update your gear profile URL\n' +
-          '• `!gear delete` - Delete your gear profile'
+          '• `!gear delete` - Delete your gear profile\n' +
+          '• `!gear list` - List all users with gear profiles'
       );
     }
   },
@@ -236,4 +239,41 @@ function formatGearType(type: string): string {
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+async function handleGearList(message: Message): Promise<void> {
+  const users = getDbService().getAllUsers();
+
+  if (users.length === 0) {
+    await message.reply('No users with gear profiles found.');
+    return;
+  }
+
+  // Separate streamers and discord users
+  const streamers = users.filter((u) => u.is_streamer);
+  const discordUsers = users.filter((u) => !u.is_streamer);
+
+  let listDisplay = '**Users with Gear Profiles**\n\n';
+
+  if (streamers.length > 0) {
+    listDisplay += '**🎮 Streamers:**\n';
+    for (const streamer of streamers) {
+      const name = streamer.twitch_username || streamer.discord_username;
+      listDisplay += `• ${name}\n`;
+    }
+    listDisplay += '\n';
+  }
+
+  if (discordUsers.length > 0) {
+    listDisplay += '**👥 Discord Users:**\n';
+    for (const user of discordUsers) {
+      listDisplay += `• ${user.discord_username}\n`;
+    }
+    listDisplay += '\n';
+  }
+
+  listDisplay += `\n_Total: ${users.length} user(s)_`;
+  listDisplay += '\n\nUse `!gear @username` to view someone\'s gear.';
+
+  await message.reply(listDisplay);
 }

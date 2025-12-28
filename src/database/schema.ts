@@ -9,6 +9,8 @@ export const UserSchema = z.object({
   garmoth_url: z.string().url('Must be a valid URL').includes('garmoth.com', {
     message: 'Must be a Garmoth URL',
   }),
+  is_streamer: z.number().int().min(0).max(1).optional(),
+  twitch_username: z.string().optional(),
   created_at: z.string().datetime().optional(),
   updated_at: z.string().datetime().optional(),
 });
@@ -36,6 +38,8 @@ export function initializeDatabase(db: Database.Database): void {
       discord_id TEXT NOT NULL UNIQUE,
       discord_username TEXT NOT NULL,
       garmoth_url TEXT NOT NULL,
+      is_streamer INTEGER DEFAULT 0,
+      twitch_username TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )

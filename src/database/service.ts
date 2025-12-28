@@ -46,6 +46,44 @@ export class DatabaseService {
     return user;
   }
 
+  createStreamer(
+    twitch_username: string,
+    garmoth_url: string,
+    discord_username?: string
+  ): User {
+    // Use twitch username as discord_id for streamers (with a prefix to avoid conflicts)
+    const discord_id = `streamer_${twitch_username}`;
+    const displayName = discord_username || twitch_username;
+
+    // Validate input with Zod
+    const userData = UserSchema.parse({
+      discord_id,
+      discord_username: displayName,
+      garmoth_url,
+      is_streamer: 1,
+      twitch_username,
+    });
+
+    const stmt = this.db.prepare(`
+      INSERT INTO users (discord_id, discord_username, garmoth_url, is_streamer, twitch_username)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+
+    const result = stmt.run(
+      userData.discord_id,
+      userData.discord_username,
+      userData.garmoth_url,
+      1,
+      userData.twitch_username
+    );
+    const user = this.getUserById(result.lastInsertRowid as number);
+    if (!user) {
+      throw new Error('Failed to create streamer');
+    }
+    logger.info('Streamer created', { id: user.id, twitch_username: user.twitch_username });
+    return user;
+  }
+
   getUserById(id: number): User | undefined {
     const stmt = this.db.prepare('SELECT * FROM users WHERE id = ?');
     return stmt.get(id) as User | undefined;
@@ -73,6 +111,16 @@ export class DatabaseService {
     const stmt = this.db.prepare('DELETE FROM users WHERE discord_id = ?');
     stmt.run(discord_id);
     logger.info('User deleted', { discord_id });
+  }
+
+  getAllUsers(): User[] {
+    const stmt = this.db.prepare('SELECT * FROM users ORDER BY is_streamer DESC, discord_username');
+    return stmt.all() as User[];
+  }
+
+  getAllStreamers(): User[] {
+    const stmt = this.db.prepare('SELECT * FROM users WHERE is_streamer = 1 ORDER BY discord_username');
+    return stmt.all() as User[];
   }
 
   // User gear operations
@@ -156,5 +204,34 @@ export class DatabaseService {
   close(): void {
     this.db.close();
     logger.info('Database closed');
+  }
+
+  // Seeding operations
+  seedStreamers(streamers: { twitch_username: string; display_name?: string; garmoth_url: string }[]): number {
+    let seededCount = 0;
+    
+    for (const streamer of streamers) {
+      const discord_id = `streamer_${streamer.twitch_username}`;
+      const existingUser = this.getUserByDiscordId(discord_id);
+      
+      if (!existingUser) {
+        try {
+          this.createStreamer(
+            streamer.twitch_username,
+            streamer.garmoth_url,
+            streamer.display_name
+          );
+          seededCount++;
+        } catch (error) {
+          logger.error('Failed to seed streamer', { 
+            twitch_username: streamer.twitch_username, 
+            error: (error as Error).message 
+          });
+        }
+      }
+    }
+    
+    logger.info('Streamers seeded', { count: seededCount });
+    return seededCount;
   }
 }
