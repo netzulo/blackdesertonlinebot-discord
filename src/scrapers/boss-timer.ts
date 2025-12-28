@@ -339,7 +339,6 @@ async function findImageAfterHeading(
   return undefined;
 }
 
-
 // Select a region from the top-right dropdown (e.g., EU, NA, SA)
 async function selectRegion(browser: Browser, regionName: string): Promise<boolean> {
   const target = regionName.trim();
