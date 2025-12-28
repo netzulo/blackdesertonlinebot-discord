@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Command } from '../types';
 import { DatabaseService } from '../database/service';
-import { scrapeGarmothProfile } from '../scrapers/garmoth';
+import { scrapeGarmothProfile } from '../scrapers/garmoth-gear';
 import { logger } from '../utils/logger';
 
 let dbService: DatabaseService | null = null;

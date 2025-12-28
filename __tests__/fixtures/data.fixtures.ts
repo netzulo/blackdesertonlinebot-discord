@@ -1,6 +1,6 @@
 import { User, UserGear } from '../../src/database/schema';
-import { GarmothProfile } from '../../src/scrapers/garmoth';
-import { BossTimerData } from '../../src/scrapers/boss-timer';
+import { GarmothProfile } from '../../src/scrapers/garmoth-gear';
+import { BossTimerData } from '../../src/scrapers/garmoth-boss-timer';
 
 export const userFixtures: Record<string, User> = {
   validUser: {

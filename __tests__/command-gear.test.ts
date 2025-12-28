@@ -15,7 +15,7 @@ import {
   urlFixtures,
   commandArgsFixtures,
 } from './fixtures/data.fixtures';
-import { scrapeGarmothProfile } from '../src/scrapers/garmoth';
+import { scrapeGarmothProfile } from '../src/scrapers/garmoth-gear';
 
 // Get mocked functions
 const mockScrapeGarmoth = scrapeGarmothProfile as jest.MockedFunction<typeof scrapeGarmothProfile>;

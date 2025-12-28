@@ -3,7 +3,7 @@ import { bossCommand } from '../src/commands/boss';
 import { Message } from 'discord.js';
 import { createMockMessage } from './mocks/discord.mock';
 import { bossTimerFixtures, commandArgsFixtures } from './fixtures/data.fixtures';
-import { scrapeBossTimer } from '../src/scrapers/boss-timer';
+import { scrapeBossTimer } from '../src/scrapers/garmoth-boss-timer';
 
 // Get mocked functions
 const mockScrapeBossTimer = scrapeBossTimer as jest.MockedFunction<typeof scrapeBossTimer>;
