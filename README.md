@@ -65,6 +65,11 @@ npm install
   BROWSER_HEADLESS=true      # true | false
   BROWSER_WIDTH=1920
   BROWSER_HEIGHT=1080
+  
+  # Proxy configuration (optional)
+  # Base URL used by all scrapers and commands to fetch data
+  # Default: http://localhost:9432/proxy
+  PROXY_URL=http://localhost:9432/proxy
   ```
    
    ⚠️ **NEVER commit your `.env` file to Git!** It contains sensitive credentials.
@@ -225,6 +230,8 @@ The `!boss` command provides Black Desert Online boss timer information from Gar
 Tip: For debugging scraping issues, set `BROWSER_HEADLESS=false` and use `BROWSER_WIDTH/BROWSER_HEIGHT` to standardize the viewport (e.g., 1920x1080). You can also adjust `BROWSER_NAME` to `firefox` when needed.
 
 Logging: Control verbosity with `LOG_LEVEL` (default: `info`).
+
+Proxy: Configure `PROXY_URL` to point to your local proxy (default `http://localhost:9432/proxy`). All scrapers (boss timer and gear profiles) will use this unified proxy.
 
 ## 🏗️ Project Structure
 
