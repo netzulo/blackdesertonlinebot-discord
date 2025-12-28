@@ -116,7 +116,7 @@ function toProxiedProfileUrl(url: string): string {
   try {
     const u = new URL(url);
     // Expect paths like /character/<id>
-    const match = u.pathname.match(/^\/character\/([^\/?#]+)(?:[\/?#].*)?$/);
+    const match = u.pathname.match(/^\/character\/([^/?#]+)(?:[/?#].*)?$/);
     const path = match ? `/character/${match[1]}` : u.pathname;
     return `${getProxyUrl()}${path}`;
   } catch {

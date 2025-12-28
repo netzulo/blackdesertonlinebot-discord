@@ -17,19 +17,13 @@ export interface BossTimerData {
 }
 
 export async function scrapeBossTimer(region?: string): Promise<BossTimerData> {
-  const headlessEnv = process.env.BROWSER_HEADLESS;
-  const headless = headlessEnv ? /^(true|1|yes)$/i.test(headlessEnv) : true;
-  const width = parseInt(process.env.BROWSER_WIDTH || '1920', 10);
-  const height = parseInt(process.env.BROWSER_HEIGHT || '1080', 10);
-
   const browser = await createBrowser();
 
   try {
     await browser.url(`${getProxyUrl()}/boss-timer`);
     logger.debug('Navigated to boss timer page');
 
-    // Ensure window has expected resolution and maximize when visible
-    // Window sizing handled in createBrowser; keep values for context
+    // Window sizing handled in createBrowser
 
     // Attempt to dismiss privacy/cookie consent overlays if present
     await tryDismissConsent(browser);
@@ -345,33 +339,6 @@ async function findImageAfterHeading(
   return undefined;
 }
 
-async function tryDismissConsent(browser: Browser): Promise<void> {
-  try {
-    // Common consent containers may inject dynamic buttons; check a few times
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const candidates = await browser.$$(['button', '[role="button"]', 'a'].join(','));
-      const phrases = ['accept', 'aceptar', 'agree', 'consent', 'continuar', 'ok'];
-
-      for (const el of candidates) {
-        const txt = (await el.getText()).toLowerCase().trim();
-        if (phrases.some((p) => txt.includes(p))) {
-          try {
-            if (await el.isDisplayed()) {
-              await el.click();
-              await browser.pause(500);
-              return;
-            }
-          } catch {
-            // ignore and continue
-          }
-        }
-      }
-      await browser.pause(500);
-    }
-  } catch {
-    // Ignore consent handling failures
-  }
-}
 
 // Select a region from the top-right dropdown (e.g., EU, NA, SA)
 async function selectRegion(browser: Browser, regionName: string): Promise<boolean> {
