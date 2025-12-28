@@ -250,8 +250,8 @@ async function handleGearList(message: Message): Promise<void> {
   }
 
   // Separate streamers and discord users
-  const streamers = users.filter((u) => u.is_streamer);
-  const discordUsers = users.filter((u) => !u.is_streamer);
+  const streamers = users.filter((u) => u.is_streamer === 1);
+  const discordUsers = users.filter((u) => u.is_streamer === 0 || !u.is_streamer);
 
   let listDisplay = '**Users with Gear Profiles**\n\n';
 

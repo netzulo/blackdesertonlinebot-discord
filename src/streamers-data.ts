@@ -21,14 +21,14 @@ export const STREAMERS: StreamerData[] = [
   // 2. Check each streamer's profile at https://www.twitch.tv/{username}/about
   // 3. Look for Garmoth.com links in their bio or panels
   
-  {
-    twitch_username: 'example_streamer1',
-    display_name: 'Example Streamer 1',
-    garmoth_url: undefined,
-    notes: 'Placeholder - No Garmoth URL found in profile',
-  },
-  // Add more streamers here as they are discovered
-  // Example with Garmoth URL (when available):
+  // Example: Placeholder streamer without Garmoth URL (commented out)
+  // {
+  //   twitch_username: 'example_streamer1',
+  //   display_name: 'Example Streamer 1',
+  //   notes: 'Placeholder - No Garmoth URL found in profile',
+  // },
+  
+  // Add streamers with Garmoth URLs here when found:
   // {
   //   twitch_username: 'actual_streamer',
   //   display_name: 'Actual Streamer',

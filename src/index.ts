@@ -107,6 +107,8 @@ export class DiscordBot {
     try {
       const streamersWithGear = getStreamersWithGear();
       if (streamersWithGear.length > 0) {
+        // Create a temporary database service instance for seeding
+        // This is safe because we close it immediately after seeding
         const dbService = new DatabaseService();
         const seededCount = dbService.seedStreamers(streamersWithGear);
         dbService.close();
