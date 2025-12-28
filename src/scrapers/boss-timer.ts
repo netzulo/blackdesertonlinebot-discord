@@ -46,7 +46,7 @@ export async function scrapeBossTimer(region?: string): Promise<BossTimerData> {
   });
 
   try {
-    await browser.url('https://garmoth.com/boss-timer');
+    await browser.url('http://localhost:9432/proxy/boss-timer');
     logger.debug('Navigated to boss timer page');
 
     // Ensure window has expected resolution and maximize when visible
