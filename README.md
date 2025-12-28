@@ -203,7 +203,7 @@ npm run format
 |---------|-------------|-------|
 | `!ping` | Check bot responsiveness and latency | `!ping` |
 | `!bdobase` | Get basic Black Desert Online information | `!bdobase` |
-| `!gear` | Manage and display user gear from Garmoth profiles | `!gear @user` or `!gear add [url]` |
+| `!gear` | Manage and display user gear from Garmoth profiles | `!gear @user` or `!gear add [url]` or `!gear list` |
 | `!boss` | Show Black Desert Online boss timer information | `!boss` or `!boss table` |
 
 ### Gear Command Details
@@ -214,6 +214,7 @@ The `!gear` command allows you to manage and display user gear profiles scraped 
 - **`!gear add [garmoth_url]`** - Add your gear profile by providing a Garmoth character URL (e.g., https://garmoth.com/character/YourCharID)
 - **`!gear update [garmoth_url]`** - Update your gear profile with a new URL or refresh data
 - **`!gear delete`** - Remove your gear profile from the database
+- **`!gear list`** - List all users with gear profiles (including both Discord users and featured streamers)
 
 ### Boss Command Details
 
@@ -225,6 +226,15 @@ The `!boss` command provides Black Desert Online boss timer information from Gar
 Tip: For debugging scraping issues, set `BROWSER_HEADLESS=false` and use `BROWSER_WIDTH/BROWSER_HEIGHT` to standardize the viewport (e.g., 1920x1080). You can also adjust `BROWSER_NAME` to `firefox` when needed.
 
 Logging: Control verbosity with `LOG_LEVEL` (default: `info`).
+
+### Featured Streamers
+
+The bot includes a curated list of popular Black Desert Online Twitch streamers who have shared their Garmoth gear profiles. These streamers are automatically added to the bot's database on startup and can be viewed using the `!gear list` command.
+
+To add more streamers to the featured list:
+1. Visit https://www.twitch.tv/directory/category/black-desert to find popular BDO streamers
+2. Check their Twitch profile at https://www.twitch.tv/{username}/about for Garmoth links
+3. Add entries to `src/streamers-data.ts` with their Twitch username and Garmoth URL
 
 ## 🏗️ Project Structure
 
@@ -258,6 +268,7 @@ blackdesertonlinebot-discord/
 │   ├── utils/                  # Utility functions
 │   │   └── helpers.ts
 │   ├── types.ts                # TypeScript types
+│   ├── streamers-data.ts       # Streamer data configuration
 │   └── index.ts                # Main bot file
 ├── data/                       # SQLite database (gitignored)
 │   └── bot.db

@@ -7,7 +7,7 @@ import { gearCommand } from './commands/gear';
 import { bossCommand } from './commands/boss';
 import { logger } from './utils/logger';
 import { DatabaseService } from './database/service';
-import { getStreamersWithGear } from './data/streamers';
+import { getStreamersWithGear } from './streamers-data';
 
 config();
 
