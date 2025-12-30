@@ -1,8 +1,9 @@
-import { Message } from 'discord.js';
+import { Message, EmbedBuilder } from 'discord.js';
 import { Command } from '../types';
 import { DatabaseService } from '../database/service';
 import { scrapeGarmothProfile } from '../scrapers/garmoth-gear';
 import { logger } from '../utils/logger';
+import { generateGearImage } from '../utils/gear-image';
 
 let dbService: DatabaseService | null = null;
 
@@ -68,30 +69,47 @@ async function handleGearShow(message: Message): Promise<void> {
     return;
   }
 
-  // Format gear data for display
-  let gearDisplay = `**Gear for ${mentionedUser.username}**\n`;
-  gearDisplay += `Profile: ${user.garmoth_url}\n\n`;
+  // No plain text summary: embed with composed image only
+  try {
+    const tiles = gearList
+      .filter((g) => isDisplayableType(g.gear_type))
+      .map((g) => {
+        const s = g.stats ? safeParseStats(g.stats) : {};
+        return {
+          gear_type: g.gear_type,
+          item_name: g.item_name,
+          enhancement_label:
+            typeof s.enhancement_label === 'string'
+              ? s.enhancement_label
+              : g.enhancement_level > 0
+                ? `+${g.enhancement_level}`
+                : 'base',
+          rarity: typeof s.rarity === 'number' ? s.rarity : 0,
+          image_url: typeof s.image_url === 'string' ? s.image_url : undefined,
+        };
+      });
 
-  // Group gear by type
-  const groupedGear: Record<string, typeof gearList> = {};
-  for (const gear of gearList) {
-    if (!groupedGear[gear.gear_type]) {
-      groupedGear[gear.gear_type] = [];
+    const summary = collectSummaryStats(gearList);
+    const buffer = await generateGearImage(tiles, summary);
+    const footerText = `AP ${summary.AP ?? 0} • AAP ${summary.AAP ?? 0} • DP ${summary.DP ?? 0} • SCORE ${summary.SCORE ?? 0}`;
+
+    const embed = new EmbedBuilder()
+      .setTitle(`🧰 ${mentionedUser.username}'s Gear`)
+      .setDescription('Scraped from Garmoth — equipment overview')
+      .setColor(0x5865f2)
+      .setImage('attachment://gear.png')
+      .setFooter({ text: footerText });
+
+    if ('send' in message.channel) {
+      await message.channel.send({
+        embeds: [embed],
+        files: [{ attachment: buffer, name: 'gear.png' }],
+      });
     }
-    groupedGear[gear.gear_type].push(gear);
+  } catch (err) {
+    logger.warn('Failed to generate gear image, sending text only', err as Error);
+    // Fallback: no embed image
   }
-
-  // Display gear grouped by type
-  for (const [type, items] of Object.entries(groupedGear)) {
-    gearDisplay += `**${formatGearType(type)}:**\n`;
-    for (const item of items) {
-      const enhanceStr = item.enhancement_level > 0 ? `+${item.enhancement_level}` : '';
-      gearDisplay += `• ${item.item_name} ${enhanceStr}\n`;
-    }
-    gearDisplay += '\n';
-  }
-
-  await message.reply(gearDisplay);
 }
 
 async function handleGearAdd(message: Message, args: string[]): Promise<void> {
@@ -139,7 +157,8 @@ async function handleGearAdd(message: Message, args: string[]): Promise<void> {
       gear_type: item.gear_type,
       item_name: item.item_name,
       enhancement_level: item.enhancement_level,
-      stats: item.stats ? JSON.stringify(item.stats) : undefined,
+      // Persist item stats merged with profile summary for later display
+      stats: JSON.stringify({ ...(item.stats || {}), ...(profile.stats || {}) }),
     }));
 
     getDbService().replaceUserGear(user.id, gearData);
@@ -198,7 +217,7 @@ async function handleGearUpdate(message: Message, args: string[]): Promise<void>
       gear_type: item.gear_type,
       item_name: item.item_name,
       enhancement_level: item.enhancement_level,
-      stats: item.stats ? JSON.stringify(item.stats) : undefined,
+      stats: JSON.stringify({ ...(item.stats || {}), ...(profile.stats || {}) }),
     }));
 
     getDbService().replaceUserGear(user.id, gearData);
@@ -231,9 +250,41 @@ async function handleGearDelete(message: Message, _args: string[]): Promise<void
   await message.reply('✅ Your gear profile has been deleted.');
 }
 
-function formatGearType(type: string): string {
-  return type
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+function isDisplayableType(type: string): boolean {
+  const t = type.toLowerCase();
+  if (t.startsWith('outfit')) return false;
+  if (t === 'tool') return false;
+  return true;
+}
+
+function safeParseStats(json: string): Record<string, unknown> {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return {};
+  }
+}
+
+type SummaryKey = 'AP' | 'AAP' | 'DP' | 'SCORE';
+
+function collectSummaryStats(
+  _gear: ReturnType<DatabaseService['getUserGearByUserId']>
+): Partial<Record<SummaryKey, number>> {
+  const keys: SummaryKey[] = ['AP', 'AAP', 'DP', 'SCORE'];
+  const out: Partial<Record<SummaryKey, number>> = {};
+  for (const item of _gear) {
+    if (!isDisplayableType(item.gear_type)) continue;
+    const s = item.stats ? safeParseStats(item.stats) : {};
+    const stats = s as Partial<Record<SummaryKey, number | string>>;
+    for (const k of keys) {
+      const v = stats[k];
+      if (typeof v === 'number') {
+        out[k] = v;
+      } else if (typeof v === 'string') {
+        const n = parseInt(v, 10);
+        if (Number.isFinite(n)) out[k] = n;
+      }
+    }
+  }
+  return out;
 }

@@ -70,6 +70,10 @@ npm install
   # Base URL used by all scrapers and commands to fetch data
   # Default: http://localhost:9432/proxy
   PROXY_URL=http://localhost:9432/proxy
+
+  # Scraper time budget (optional)
+  # Max time (ms) for blocking steps like consent dismissal
+  SCRAPER_TIMEOUT_MS=12000
   ```
    
    ⚠️ **NEVER commit your `.env` file to Git!** It contains sensitive credentials.

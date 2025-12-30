@@ -17,6 +17,7 @@ export interface GarmothProfile {
 
 export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothProfile> {
   const browser = (await createBrowser()) as Browser;
+  const SCRAPER_TIMEOUT_MS = parseInt(process.env.SCRAPER_TIMEOUT_MS || '12000', 10);
 
   try {
     const proxied = toProxiedProfileUrl(profileUrl);
@@ -24,32 +25,52 @@ export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothP
     logger.debug('Navigated to garmoth profile via proxy', { proxied });
 
     // Attempt to dismiss privacy/cookie consent overlays if present
-    await tryDismissConsent(browser);
+    logger.debug('Trying to dismiss consent...');
+    await withTimeout(tryDismissConsent(browser), SCRAPER_TIMEOUT_MS).catch(() => {
+      logger.debug('Consent dismissal timed out, continuing without dismiss.');
+    });
 
     // Wait for the page to load
     await browser.pause(2000);
+
+    const start = Date.now();
+    logger.debug('Begin gear scraping');
 
     // Scrape gear section
     const gear: GearItem[] = [];
 
     // Target gear items inside the equipment section and extract slot, image and enhancement level
     const gearElements = await browser.$$('.equipment .gear');
+    logger.debug('Equipment gear elements found', { count: gearElements.length });
 
     for (const element of gearElements) {
       try {
         const classAttr = (await element.getAttribute('class')) || '';
         const gearSlot = parseGearSlot(classAttr);
+        logger.debug('Processing gear element', { classAttr, gearSlot });
 
         const imgEl = await element.$('img');
-        const imageUrl = imgEl ? await imgEl.getAttribute('src') : undefined;
-        const alt = imgEl ? await imgEl.getAttribute('alt') : undefined;
+        const imgExists = await imgEl.isExisting();
+        const imageUrl = imgExists ? await imgEl.getAttribute('src') : undefined;
+        const alt = imgExists ? await imgEl.getAttribute('alt') : undefined;
 
         const enhanceEl = await element.$('p.enhance-level');
-        const enhanceText = enhanceEl ? (await enhanceEl.getText()).trim() : '';
+        const hasEnhance = await enhanceEl.isExisting();
+        const enhanceText = hasEnhance ? (await enhanceEl.getText()).trim() : '';
         const enhancement = parseEnhancement(enhanceText);
+        const enhancementLabel = enhanceText ? enhanceText : 'base';
 
         const rarity = parseRarity(classAttr);
         const itemName = deriveItemName(gearSlot, alt, imageUrl);
+
+        logger.debug('Parsed gear item', {
+          gear_type: gearSlot,
+          item_name: itemName,
+          enhancement_level: enhancement,
+          rarity,
+          image_url: imageUrl,
+          enhancement_label: enhancementLabel,
+        });
 
         gear.push({
           gear_type: gearSlot,
@@ -58,6 +79,7 @@ export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothP
           stats: {
             image_url: imageUrl || '',
             rarity,
+            enhancement_label: enhancementLabel,
           },
         });
       } catch (err) {
@@ -69,22 +91,33 @@ export async function scrapeGarmothProfile(profileUrl: string): Promise<GarmothP
     // Scrape stats section
     const stats: Record<string, string | number> = {};
 
-    // Try to get stats from the page
-    const statElements = await browser.$$('.stat-item, [class*="stat"]');
-
-    for (const element of statElements) {
-      try {
-        const text = await element.getText();
-        if (text && text.includes(':')) {
-          const [key, value] = text.split(':').map((s) => s.trim());
-          stats[key] = value;
+    // Summary numbers: AP, AAP, DP, SCORE from the 4-column grid
+    try {
+      const grid = await browser.$('.grid.grid-cols-4.items-end.text-center');
+      if (await grid.isExisting()) {
+        const nums = await grid.$$('p.text-2xl.font-bold');
+        const texts: string[] = [];
+        for (const el of nums) {
+          const t = await el.getText();
+          texts.push(t);
         }
-      } catch (err) {
-        // Skip elements that can't be processed
-        logger.warn('Error processing stat element:', err as Error);
+        if (texts.length >= 4) {
+          const ap = parseInt(texts[0].trim(), 10);
+          const aap = parseInt(texts[1].trim(), 10);
+          const dp = parseInt(texts[2].trim(), 10);
+          const score = parseInt(texts[3].trim(), 10);
+          if (Number.isFinite(ap)) stats.AP = ap;
+          if (Number.isFinite(aap)) stats.AAP = aap;
+          if (Number.isFinite(dp)) stats.DP = dp;
+          if (Number.isFinite(score)) stats.SCORE = score;
+        }
       }
+    } catch (err) {
+      logger.debug('Failed to parse summary stats grid; continuing', err as Error);
     }
 
+    const elapsed = Date.now() - start;
+    logger.debug('Finished gear scraping', { items: gear.length, elapsed_ms: elapsed });
     return { gear, stats };
   } finally {
     await browser.deleteSession();
@@ -137,6 +170,19 @@ function toProxiedProfileUrl(url: string): string {
   }
 }
 
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('timeout')), ms);
+    p.then((v) => {
+      clearTimeout(t);
+      resolve(v);
+    }).catch((e) => {
+      clearTimeout(t);
+      reject(e);
+    });
+  });
+}
+
 // Extract gear slot from class list (e.g., "gear-main_weapon" -> "main_weapon")
 function parseGearSlot(classAttr: string): string {
   const classes = classAttr.split(/\s+/);
@@ -181,3 +227,5 @@ function deriveItemName(slot: string, alt?: string | null, src?: string | null):
   }
   return slot;
 }
+
+// removed: previous regex-based summary parser
