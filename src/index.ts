@@ -40,7 +40,7 @@ export class DiscordBot {
       const envName = process.env.ENV_NAME || 'env';
       logger.info(`✅ Bot is ready! Logged in as ${readyClient.user.tag}`);
       logger.info(`🌍 Environment: ${envName}`);
-      
+
       // Seed streamers on startup
       this.seedStreamersData();
     });

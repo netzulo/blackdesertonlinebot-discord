@@ -1,11 +1,7 @@
 import './mocks/setup';
 import { gearCommand } from '../src/commands/gear';
 import { Message } from 'discord.js';
-import {
-  createMockMessage,
-  mockDatabaseService,
-  resetMockDatabase,
-} from './mocks/discord.mock';
+import { createMockMessage, mockDatabaseService, resetMockDatabase } from './mocks/discord.mock';
 
 describe('Gear Command - List Subcommand', () => {
   beforeEach(() => {

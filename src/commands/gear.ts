@@ -324,7 +324,7 @@ async function handleGearList(message: Message): Promise<void> {
   }
 
   listDisplay += `\n_Total: ${users.length} user(s)_`;
-  listDisplay += '\n\nUse `!gear @username` to view someone\'s gear.';
+  listDisplay += "\n\nUse `!gear @username` to view someone's gear.";
 
   await message.reply(listDisplay);
 }
