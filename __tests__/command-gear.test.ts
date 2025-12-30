@@ -15,7 +15,7 @@ import {
   urlFixtures,
   commandArgsFixtures,
 } from './fixtures/data.fixtures';
-import { scrapeGarmothProfile } from '../src/scrapers/garmoth';
+import { scrapeGarmothProfile } from '../src/scrapers/garmoth-gear';
 
 // Get mocked functions
 const mockScrapeGarmoth = scrapeGarmothProfile as jest.MockedFunction<typeof scrapeGarmothProfile>;
@@ -68,7 +68,11 @@ describe('Gear Command', () => {
 
       expect(mockDatabaseService.getUserByDiscordId).toHaveBeenCalledWith('123456789');
       expect(mockDatabaseService.getUserGearByUserId).toHaveBeenCalledWith(1);
-      expect(mockMessage.reply).toHaveBeenCalledWith(expect.stringContaining('Gear for'));
+      // Should send an embed with an attached image, not plain text
+      const sendArgs = ((mockMessage.channel as any).send as jest.Mock).mock.calls[0][0];
+      expect(sendArgs.embeds).toBeDefined();
+      expect(sendArgs.files).toBeDefined();
+      expect(sendArgs.files[0].name).toBe('gear.png');
     });
 
     it('should show message when user has no gear data', async () => {
@@ -94,6 +98,48 @@ describe('Gear Command', () => {
       expect(mockMessage.reply).toHaveBeenCalledWith(
         expect.stringContaining('has no gear data stored')
       );
+    });
+
+    it('should filter outfit_* and tool from output', async () => {
+      const mentionedUser = createMockUser({ id: '123456789', username: 'filteruser' });
+      const mockMessage = createMockMessageWithMentions([mentionedUser]) as Message;
+
+      mockDatabaseService.getUserByDiscordId.mockReturnValue(userFixtures.validUser);
+      mockDatabaseService.getUserGearByUserId.mockReturnValue([
+        {
+          id: 1,
+          user_id: 1,
+          gear_type: 'outfit_armor',
+          item_name: 'Outfit Armor',
+          enhancement_level: 0,
+          stats: undefined,
+        },
+        {
+          id: 2,
+          user_id: 1,
+          gear_type: 'tool',
+          item_name: 'Tool',
+          enhancement_level: 10,
+          stats: undefined,
+        },
+        {
+          id: 3,
+          user_id: 1,
+          gear_type: 'helmet',
+          item_name: 'Griffon Helmet',
+          enhancement_level: 3,
+          stats: undefined,
+        },
+      ] as any);
+
+      await gearCommand.execute(mockMessage, []);
+
+      // Embed-only behavior: no plaintext summary reply, image is sent
+      expect(mockMessage.reply).not.toHaveBeenCalled();
+      const sendArgs = ((mockMessage.channel as any).send as jest.Mock).mock.calls[0][0];
+      expect(sendArgs.embeds).toBeDefined();
+      expect(sendArgs.files).toBeDefined();
+      expect(sendArgs.files[0].name).toBe('gear.png');
     });
   });
 

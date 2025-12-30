@@ -8,11 +8,11 @@ jest.mock('../../src/database/service', () => {
 });
 
 // Mock the scrapers
-jest.mock('../../src/scrapers/garmoth', () => ({
+jest.mock('../../src/scrapers/garmoth-gear', () => ({
   scrapeGarmothProfile: jest.fn(),
 }));
 
-jest.mock('../../src/scrapers/boss-timer', () => ({
+jest.mock('../../src/scrapers/garmoth-boss-timer', () => ({
   scrapeBossTimer: jest.fn(),
 }));
 

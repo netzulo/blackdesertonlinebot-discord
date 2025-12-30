@@ -65,6 +65,15 @@ npm install
   BROWSER_HEADLESS=true      # true | false
   BROWSER_WIDTH=1920
   BROWSER_HEIGHT=1080
+  
+  # Proxy configuration (optional)
+  # Base URL used by all scrapers and commands to fetch data
+  # Default: http://localhost:9432/proxy
+  PROXY_URL=http://localhost:9432/proxy
+
+  # Scraper time budget (optional)
+  # Max time (ms) for blocking steps like consent dismissal
+  SCRAPER_TIMEOUT_MS=12000
   ```
    
    ⚠️ **NEVER commit your `.env` file to Git!** It contains sensitive credentials.
@@ -229,6 +238,8 @@ Logging: Control verbosity with `LOG_LEVEL` (default: `info`).
 
 ### Featured Streamers
 
+Proxy: Configure `PROXY_URL` to point to your local proxy (default `http://localhost:9432/proxy`). All scrapers (boss timer and gear profiles) will use this unified proxy.
+
 The bot includes a curated list of popular Black Desert Online Twitch streamers who have shared their Garmoth gear profiles. These streamers are automatically added to the bot's database on startup and can be viewed using the `!gear list` command.
 
 To add more streamers to the featured list:
@@ -255,8 +266,6 @@ blackdesertonlinebot-discord/
 │   └── docker-prod.sh          # Prod Docker setup
 ├── src/
 │   ├── commands/               # Bot commands
-│   │   ├── ping.ts
-│   │   ├── bdobase.ts
 │   │   ├── gear.ts
 │   │   └── boss.ts
 │   ├── database/               # Database layer
@@ -310,8 +319,6 @@ import { myCommand } from './commands/mycommand';
 
 // Add to commandList array
 const commandList: Command[] = [
-  pingCommand,
-  bdobaseCommand,
   myCommand, // Add here
 ];
 ```

@@ -1,8 +1,6 @@
 import { Client, GatewayIntentBits, Events, Collection } from 'discord.js';
 import { config } from 'dotenv';
 import { Command } from './types';
-import { pingCommand } from './commands/ping';
-import { bdobaseCommand } from './commands/bdobase';
 import { gearCommand } from './commands/gear';
 import { bossCommand } from './commands/boss';
 import { logger } from './utils/logger';
@@ -30,7 +28,7 @@ export class DiscordBot {
   }
 
   private setupCommands(): void {
-    const commandList: Command[] = [pingCommand, bdobaseCommand, gearCommand, bossCommand];
+    const commandList: Command[] = [gearCommand, bossCommand];
 
     for (const command of commandList) {
       this.commands.set(command.name, command);
