@@ -65,6 +65,15 @@ npm install
   BROWSER_HEADLESS=true      # true | false
   BROWSER_WIDTH=1920
   BROWSER_HEIGHT=1080
+  
+  # Proxy configuration (optional)
+  # Base URL used by all scrapers and commands to fetch data
+  # Default: http://localhost:9432/proxy
+  PROXY_URL=http://localhost:9432/proxy
+
+  # Scraper time budget (optional)
+  # Max time (ms) for blocking steps like consent dismissal
+  SCRAPER_TIMEOUT_MS=12000
   ```
    
    ⚠️ **NEVER commit your `.env` file to Git!** It contains sensitive credentials.
@@ -201,8 +210,6 @@ npm run format
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| `!ping` | Check bot responsiveness and latency | `!ping` |
-| `!bdobase` | Get basic Black Desert Online information | `!bdobase` |
 | `!gear` | Manage and display user gear from Garmoth profiles | `!gear @user` or `!gear add [url]` |
 | `!boss` | Show Black Desert Online boss timer information | `!boss` or `!boss table` |
 
@@ -226,6 +233,8 @@ Tip: For debugging scraping issues, set `BROWSER_HEADLESS=false` and use `BROWSE
 
 Logging: Control verbosity with `LOG_LEVEL` (default: `info`).
 
+Proxy: Configure `PROXY_URL` to point to your local proxy (default `http://localhost:9432/proxy`). All scrapers (boss timer and gear profiles) will use this unified proxy.
+
 ## 🏗️ Project Structure
 
 ```
@@ -245,8 +254,6 @@ blackdesertonlinebot-discord/
 │   └── docker-prod.sh          # Prod Docker setup
 ├── src/
 │   ├── commands/               # Bot commands
-│   │   ├── ping.ts
-│   │   ├── bdobase.ts
 │   │   ├── gear.ts
 │   │   └── boss.ts
 │   ├── database/               # Database layer
@@ -299,8 +306,6 @@ import { myCommand } from './commands/mycommand';
 
 // Add to commandList array
 const commandList: Command[] = [
-  pingCommand,
-  bdobaseCommand,
   myCommand, // Add here
 ];
 ```

@@ -1,6 +1,6 @@
 import { Message, EmbedBuilder } from 'discord.js';
 import { Command } from '../types';
-import { scrapeBossTimer } from '../scrapers/boss-timer';
+import { scrapeBossTimer } from '../scrapers/garmoth-boss-timer';
 import { logger } from '../utils/logger';
 
 export const bossCommand: Command = {
